@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerMessenger.Application", "ServerMessenger.Application\ServerMessenger.Application.csproj", "{F63CA9A1-76D1-4133-8A31-A9093C37A48F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server.Application", "Application\Application.csproj", "{F63CA9A1-76D1-4133-8A31-A9093C37A48F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerMessenger.Core", "ServerMessenger.Core\ServerMessenger.Core.csproj", "{3E6810AB-8886-479C-8588-A5C40D9C6DBD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server.Core", "Core\Core.csproj", "{3E6810AB-8886-479C-8588-A5C40D9C6DBD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerMessenger.Infrastructure", "ServerMessenger.Infrastructure\ServerMessenger.Infrastructure.csproj", "{0891EF13-A52D-4EBB-BAFC-D013E23AC69E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server.Infrastructure", "Infrastructure\Infrastructure.csproj", "{0891EF13-A52D-4EBB-BAFC-D013E23AC69E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerMessenger.Presentation", "ServerMessenger.Presentation\ServerMessenger.Presentation.csproj", "{DD483289-7235-45DE-852E-2D74EB5CCA23}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server.Presentation", "Presentation\Presentation.csproj", "{DD483289-7235-45DE-852E-2D74EB5CCA23}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
