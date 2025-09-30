@@ -1,0 +1,23 @@
+.buttons-container {
+    display: flex;
+    align-items: center;
+    justify-content: center; 
+    gap: 1rem;
+}
+
+.buttons-input {
+    width: 3.5rem;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px;
+    background-image: linear-gradient(76deg, #6a0dad 0%, #9d4edd 100%);
+    aspect-ratio: 1/1;
+}
+
+.input-buttons-image {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+}

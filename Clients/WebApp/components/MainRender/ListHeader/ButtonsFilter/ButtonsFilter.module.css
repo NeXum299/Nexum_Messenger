@@ -1,0 +1,35 @@
+.people-filter-container {
+    margin: 15px 0;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.message-filter-container {
+    flex-wrap: wrap;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.people-buttons-filter {
+    background-image: linear-gradient(41deg,rgba(106, 13, 173, 1) 0%, rgba(149, 23, 252, 1) 37%);
+    border-radius: 20px;
+    padding: 10px;
+    border: 1px solid #5f008c;
+    color: #fff;
+}
+
+.message-buttons-filter {
+    color: #fff;
+    background-image: linear-gradient(41deg,rgba(106, 13, 173, 1) 0%, rgba(149, 23, 252, 1) 37%);
+    border: none;
+    border-radius: 20px;
+    padding: 10px;
+    border: 1px solid #5f008c;
+}

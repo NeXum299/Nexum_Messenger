@@ -1,0 +1,20 @@
+using System.Threading.Tasks;
+using ServerMessenger.Application.DTO;
+using ServerMessenger.Application.Results;
+
+namespace ServerMessenger.Application.Interface.Services
+{
+    /// <summary>Интерфейс сервиса аутентификации, предоставляющий методы для регистрации и входа пользователей.</summary>
+    public interface IAuthService
+    {
+        /// <summary>Регистрирует нового пользователя асинхронно.</summary>
+        /// <param name="model">Модель регистрации, содержащая данные пользователя.</param>
+        /// <returns>Результат операции, содержащий информацию об успехе или ошибке.</returns>
+        Task<Result> RegisterUserAsync(RegisterModel model);
+
+        /// <summary>Выполняет вход пользователя асинхронно.</summary>
+        /// <param name="model">Модель входа, содержащая учетные данные пользователя.</param>
+        /// <returns>Результат операции, содержащий информацию об успехе или ошибке.</returns>
+        Task<Result> LoginUserAsync(LoginModel model);
+    }
+}

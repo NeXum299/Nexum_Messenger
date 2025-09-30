@@ -1,0 +1,58 @@
+.main-container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    color: #fff;
+}
+
+.second-column {
+    display: flex;
+    flex-direction: column;
+    width: 25%;
+    height: 100%;
+}
+
+.list-header {
+    background: rgba(89, 0, 176, 0.4);
+    padding: 10px;
+    border-right: 1px solid #5f008c;
+}
+
+.item-list {
+    height: 100%;
+    background: rgba(80, 0, 128, 0.3);
+    overflow-y: auto;
+    border-top: 1px solid #5f008c;
+    border-right: 1px solid #5f008c;
+    justify-items: center;
+}
+
+.third-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header-area {
+    flex: 1;
+    overflow-y: auto;
+    background: none;
+}
+
+.message-input {
+    background: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 2rem;
+}
+
+.third-column:empty::before {
+    content: "Выберите собеседника для начала общения";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #666;
+    font-size: 16px;
+}

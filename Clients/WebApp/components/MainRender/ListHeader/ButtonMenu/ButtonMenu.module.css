@@ -1,0 +1,16 @@
+.menu-button {
+    background-color: rgba(177, 177, 177, 0.2);
+    border: 1px solid #8a2be2;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 40%;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    margin-right: 10px;
+}
+
+.menu-button:hover {
+    background: rgba(89, 0, 176, 0.8);
+    transform: translateY(-1px);
+}

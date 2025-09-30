@@ -1,0 +1,15 @@
+.text-input {
+    flex: 0 0 85%;
+    border: 1px solid #8200d1;
+    font-size: 1rem;
+    border-radius: 35px;
+    padding: 10px;
+    background-color: rgba(80, 0, 166, 0.3);
+    color: #fff;
+}
+
+.text-input:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}

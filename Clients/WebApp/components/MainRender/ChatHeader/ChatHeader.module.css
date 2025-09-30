@@ -1,0 +1,41 @@
+.chat-header-container {
+    border-bottom: 1px solid #8400cf;
+    background-color: rgba(132, 0, 207, 0.3);
+    padding: 1rem;
+    border-radius: 0 0 15px 15px;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.group-name {
+    font-size: 1.3rem;
+}
+
+.friend-info, .group-info, .channel-info {
+    flex: 1;
+}
+
+.friend-name {
+    font-size: 1.3rem;
+    margin: 0;
+}
+
+.friend-status {
+    font-size: 0.9rem;
+    color: #00ff00;
+    margin: 0;
+}
+
+.channel-name {
+    font-size: 1.3rem;
+    margin: 0;
+}
+
+.subscribers-count {
+    font-size: 0.9rem;
+    color: #666;
+}

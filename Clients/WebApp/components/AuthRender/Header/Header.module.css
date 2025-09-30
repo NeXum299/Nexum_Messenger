@@ -1,0 +1,11 @@
+.header {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 3px solid rgba(128, 129, 255, 0.5);
+}
+
+.header p {
+    font-size: 2rem;
+    color: #fff;
+    text-shadow: 2px 2px 2px rgba(123, 44, 191, 0.25);
+}

@@ -1,0 +1,90 @@
+.items-container {
+    padding: 15px;
+    background-color: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    box-sizing: border-box;
+    justify-items: center;
+}
+
+.header-text {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #fff;
+}
+
+.items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.group-item,
+.friend-item {
+    background-color: rgba(134, 0, 176, 0.4);
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border: 1px solid rgba(134, 0, 176, 0.9);
+}
+
+.group-item:hover,
+.friend-item:hover {
+    background-color: rgba(134, 0, 176, 0.8);
+    border-color: #007bff;
+}
+
+.item-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+}
+
+.group-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.friend-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.item-info {
+    flex: 1;
+}
+
+.group-name {
+    font-weight: 500;
+    font-size: 16px;
+    color: #fff;
+}
+
+.friend-name {
+    font-weight: 500;
+    margin: 0 0 2px 0;
+    font-size: 14px;
+    color: #fff;
+}
+
+.friend-username {
+    font-size: 12px;
+    color: #666;
+}
+
+.item-type-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 12px;
+    background-color: #e9ecef;
+    color: #4D4D4D;
+    font-weight: 500;
+}

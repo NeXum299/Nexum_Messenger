@@ -1,0 +1,129 @@
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: user-messenger
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+  cassandra_node1:
+    image: cassandra:latest
+    containter_name: cassandra-cassandra_node1
+    environment:
+      - CASSANDRA_CLUSTER_NAME=user-messenger-cluster
+      - CASSANDRA_SEEDS=cassandra-node1,cassandra-node2,cassandra-node3
+      - CASSANDRA_DC=datacenter1
+      - CASSANDRA_RACK=rack1
+      - CASSANDRA_ENDPOINT=SNITCH=GossipingPropertyFileSnitch
+    volumes:
+      - cassandra_data1:/var/lib/cassandra
+    ports:
+      - "9042:9042"  # CQL native transport port
+      - "7000:7000"  # Internode communication
+      - "7001:7001"  # SSL internode communication
+      - "7199:7199"  # JMX monitoring
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "cqlsh", "-u", "cassandra", "-p", "cassandra", "-e", "describe keyspaces"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    
+    cassandra_node2:
+      image: cassandra:latest
+      containter_name: cassandra-cassandra_node2
+      environment:
+        - CASSANDRA_CLUSTER_NAME=user-messenger-cluster
+        - CASSANDRA_SEEDS=cassandra-node1,cassandra-node2,cassandra-node3
+        - CASSANDRA_DC=datacenter1
+        - CASSANDRA_RACK=rack1
+        - CASSANDRA_ENDPOINT=SNITCH=GossipingPropertyFileSnitch
+      volumes:
+        - cassandra_data2:/var/lib/cassandra
+      ports:
+        - "9043:9042"  # CQL native transport port
+        - "7002:7000"  # Internode communication
+        - "7003:7001"  # SSL internode communication
+        - "7200:7199"  # JMX monitoring
+      networks:
+        - app-network
+      healthcheck:
+        test: ["CMD", "cqlsh", "-u", "cassandra", "-p", "cassandra", "-e", "describe keyspaces"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+      
+    cassandra_node3:
+      image: cassandra:latest
+      containter_name: cassandra-cassandra_node3
+      environment:
+        - CASSANDRA_CLUSTER_NAME=user-messenger-cluster
+        - CASSANDRA_SEEDS=cassandra-node1,cassandra-node2,cassandra-node3
+        - CASSANDRA_DC=datacenter1
+        - CASSANDRA_RACK=rack1
+        - CASSANDRA_ENDPOINT=SNITCH=GossipingPropertyFileSnitch
+      volumes:
+        - cassandra_data3:/var/lib/cassandra
+      ports:
+        - "9044:9042"  # CQL native transport port
+        - "7004:7000"  # Internode communication
+        - "7005:7001"  # SSL internode communication
+        - "7201:7199"  # JMX monitoring
+      networks:
+        - app-network
+      healthcheck:
+        test: ["CMD", "cqlsh", "-u", "cassandra", "-p", "cassandra", "-e", "describe keyspaces"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+
+  backend:
+    build:
+      context: ../Server
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "5000:80"
+      - "5001:443"
+    depends_on:
+      - db
+      - cassandra-node1
+      - cassandra-node2
+      - cassandra-node3
+    networks:
+      - app-network
+    
+  frontend:
+    build:
+      context: ../Clients/WebApp
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../Clients/WebApp:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCH_PACKAGE_POLLING=true
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+  cassandra_data1:
+  cassandra_data2:
+  cassandra_data3:
+
+networks:
+  app-network:
+    driver: bridge

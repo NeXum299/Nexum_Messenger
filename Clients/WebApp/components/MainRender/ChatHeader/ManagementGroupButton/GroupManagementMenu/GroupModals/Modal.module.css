@@ -1,0 +1,125 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modalOverlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modalContent {
+    border: 1px solid #6c0085;
+    background-image: linear-gradient(180deg, #0F0B1A 0%, #121212 100%);
+    padding: 20px;
+    border-radius: 8px;
+    transform: scale(0.8);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.modalOverlay.open .modalContent {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.modalOverlay.closing .modalContent {
+    transform: scale(0.8);
+    opacity: 0;
+}
+
+.closeButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    transition: color 0.2s;
+}
+
+.closeButton:hover {
+    color: #333;
+}
+
+.headerText {
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-size: 24px;
+    color: #fff;
+    text-align: center;
+    text-shadow: 2px 2px 2px rgba(123, 44, 191, 0.25);
+}
+
+.formInput {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.inputText {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+    background: none;
+    border: 1px solid #6c0085;
+    color: #fff;
+}
+
+.inputText:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.modalButton[type="submit"] {
+    background-image: linear-gradient(76deg, #6a0dad 0%, #9d4edd 100%);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+}
+
+.modalButton[type="submit"]:hover {
+    background-color: #3a7bc8;
+}
+
+.error {
+    color: #e74c3c;
+    background-color: #fdecea;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.inputText[type="textarea"] {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.modalButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
