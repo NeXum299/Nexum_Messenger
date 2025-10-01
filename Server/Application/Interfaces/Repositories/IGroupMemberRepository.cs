@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Server.Application.DTO;
-using Server.Application.Results;
-using Server.Application.Roles;
 using Server.Core.Entities;
 
 namespace Server.Application.Interface.Repositories
@@ -17,18 +15,18 @@ namespace Server.Application.Interface.Repositories
         /// <param name="role">Роль добавляемого пользователя.</param>
         /// <returns>При успехе, возвращает успешный результат.</returns>
         /// <returns>При ошибке, возвращает проваленный результат с описанием ошибки.</returns>
-        Task<Result> AddMemberAsync(Group group, User user, string role = GroupRoles.Member);
+        Task AddMemberAsync(GroupEntity group, UserEntity user, string role);
 
         /// <summary>Получает определённого участника по идентфикатору.</summary>
         /// <param name="memberId">Идентификатор получаемого участника.</param>
         /// <returns>Возвращает участника в какой то группе.</returns>
-        Task<Result<GroupMember>> GetGroupMemberByIdAsync(Guid memberId);
+        Task<GroupMemberEntity> GetGroupMemberByIdAsync(Guid memberId);
 
         /// <summary>Получает всех участников указанной группы.</summary>
         /// <param name="group">Группа.</param>
         /// <returns>При успехе, возвращает успешный результат со списком пользователей.</returns>
         /// <returns>При ошибке, возвращает проваленный результат с пустым списком и описанием ошибки.</returns>
-        Task<Result<List<GroupMemberDto>>> GetGroupMembersAsync(Group group);
+        Task<List<GroupMemberDto>> GetGroupMembersAsync(GroupEntity group);
 
         /// <summary>
         /// Получает определённого участника по идентификатору пользователя и идентификатору группы.
@@ -36,31 +34,31 @@ namespace Server.Application.Interface.Repositories
         /// <param name="userId">Идентификатор пользователя.</param>
         /// <param name="groupId">Идентификатор группы</param>
         /// <returns>Возвращает участника группы.</returns>
-        Task<Result<GroupMember>> GetMemberByUserIdAndGroupIdAsync(Guid userId, Guid groupId);
+        Task<GroupMemberEntity> GetMemberByUserIdAndGroupIdAsync(Guid userId, Guid groupId);
 
         /// <summary>Получает количество участников в группе.</summary>
         /// <param name="groupId">Идентификатор группы.</param>
         /// <returns>Результат с количеством участников.</returns>
-        Task<Result<int>> GetMembersCountAsync(Guid groupId);
+        Task<int> GetMembersCountAsync(Guid groupId);
 
         /// <summary>Даёт права администратора члену группы.</summary>
         /// <param name="group">Группа.</param>
         /// <param name="user">П0ользователь.</param>
         /// <returns>При успехе, возвращает успешный результат.</returns>
         /// <returns>При ошибке, возвращает проваленный результат с описанием ошибки.</returns>
-        Task<Result> PromoteToAdminAsync(Group group, User user);
+        Task PromoteToAdminAsync(GroupEntity group, UserEntity user);
 
         /// <summary>Изымает права администратора у администратора.</summary>
         /// <param name="group">Групп.</param>
         /// <param name="user">Пользователь.</param>
         /// <returns>При успехе, возвращает успешный результат.</returns>
         /// <returns>При ошибке, возвращает проваленный результат с описанием ошибки.</returns>
-        Task<Result> DemoteToMemberAsync(Group group, User user);
+        Task DemoteToMemberAsync(GroupEntity group, UserEntity user);
 
         /// <summary>Удаляет пользователя из группы.</summary>
         /// <param name="member">Удаляемый пользователь.</param>
         /// <returns>При успехе, возвращает успешный результат.</returns>
         /// <returns>При ошибке, возвращает проваленный результат с описанием ошибки.</returns>
-        Task<Result> RemoveMemberAsync(GroupMember member);
+        Task RemoveMemberAsync(GroupMemberEntity member);
     }
 }

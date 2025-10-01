@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using Server.Application.DTO;
-using Server.Application.Results;
 
 namespace Server.Application.Interface.Services
 {
@@ -10,11 +9,11 @@ namespace Server.Application.Interface.Services
         /// <summary>Регистрирует нового пользователя асинхронно.</summary>
         /// <param name="model">Модель регистрации, содержащая данные пользователя.</param>
         /// <returns>Результат операции, содержащий информацию об успехе или ошибке.</returns>
-        Task<Result> RegisterUserAsync(RegisterModel model);
+        Task RegisterUserAsync(RegisterModel model);
 
         /// <summary>Выполняет вход пользователя асинхронно.</summary>
         /// <param name="model">Модель входа, содержащая учетные данные пользователя.</param>
         /// <returns>Результат операции, содержащий информацию об успехе или ошибке.</returns>
-        Task<Result> LoginUserAsync(LoginModel model);
+        Task LoginUserAsync(LoginModel model);
     }
 }

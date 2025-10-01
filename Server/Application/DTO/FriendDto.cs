@@ -3,13 +3,13 @@ using System;
 namespace Server.Application.DTO
 {
     /// <summary>
-    /// DTO друга
+    /// 
     /// </summary>
-    /// <param name="id">Идентификатор друга.</param>
-    /// <param name="userName">Никнейм друга.</param>
-    /// <param name="firstName">Имя друга.</param>
-    /// <param name="lastName">Фамилия друга.</param>
-    /// <param name="avatarPath">Аватар друга.</param>
+    /// <param name="id"></param>
+    /// <param name="userName"></param>
+    /// <param name="firstName"></param>
+    /// <param name="lastName"></param>
+    /// <param name="avatarPath"></param>
     public record class FriendDto(
         Guid id,
         string userName,

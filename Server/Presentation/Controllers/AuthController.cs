@@ -2,13 +2,16 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Server.Application.DTO;
+using Server.Application.Exceptions;
 using Server.Application.Interface.Services;
 using Server.Application.Jwt;
 using Server.Core.Entities;
 
 namespace Server.Presentation.Controllers
 {
-    /// <summary>Контроллер для обработки запросов аутентификации и авторизации пользователей.</summary>
+    /// <summary>
+    /// 
+    /// </summary>
     [Route("api/auth")]
     [ApiController]
     public class AuthController : ControllerBase
@@ -17,83 +20,141 @@ namespace Server.Presentation.Controllers
         private readonly IUserService _userService;
         private readonly ITokenService _tokenService;
         private readonly JwtSettings _jwtSettings;
+        private readonly ILogger<AuthController> _logger;
 
-        /// <summary>Инициализирует новый экземпляр AuthController.</summary>
-        /// <param name="authService">Сервис аутентификации</param>
-        /// <param name="tokenService">Сервис работы с токенами</param>
-        /// <param name="userService">Сервис работы с пользователями</param>
-        /// <param name="jwtSettings">Настройки JWT</param>
-        public AuthController(IAuthService authService, ITokenService tokenService,
-            IUserService userService, JwtSettings jwtSettings)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="authService"></param>
+        /// <param name="tokenService"></param>
+        /// <param name="userService"></param>
+        /// <param name="jwtSettings"></param>
+        /// <param name="logger"></param>
+        public AuthController(
+            IAuthService authService,
+            ITokenService tokenService,
+            IUserService userService,
+            JwtSettings jwtSettings,
+            ILogger<AuthController> logger)
         {
             _authService = authService;
             _tokenService = tokenService;
             _userService = userService;
             _jwtSettings = jwtSettings;
+            _logger = logger;
         }
 
-        /// <summary>Регистрирует нового пользователя.</summary>
-        /// <param name="model">Модель регистрации пользователя</param>
-        /// <returns>Результат операции регистрации</returns>
-        /// <response code="200">Успешная регистрация</response>
-        /// <response code="400">Ошибка при регистрации</response>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
             if (!ModelState.IsValid)
                 return ValidationProblem(ModelState);
 
-            var firstResult = await _authService.RegisterUserAsync(model);
+            try
+            {
+                await _authService.RegisterUserAsync(model);
+                var user = await _userService
+                    .GetUserByPhoneNumberAsync(model.phoneNumber!);
 
-            if (firstResult.Fail)
-                return BadRequest(new { success = false, errors = firstResult.Errors });
-
-            var secondResult = await _userService.GetUserByPhoneNumberAsync(model.PhoneNumber!);
-
-            if (secondResult.Fail)
-                return BadRequest(new { success = false, error = secondResult.Errors });
-
-            var user = secondResult.Value;
-
-            if (user == null)
-                return BadRequest(new { success = false, errors = new[] { "User not found after registration" } });
-
-            return await GenerateAndSetTokens(user);
+                if (user == null)
+                    return BadRequest(new
+                    {
+                        success = false,
+                        errors = new[] {
+                            "Пользователь не найден после регистрации" }
+                    });
+                            
+                return await GenerateAndSetTokens(user);
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    errors = new[] { ex.Message }
+                });
+            }
+            catch (UserCreationException ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    errors = new[] { ex.Message }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error during registration");
+                return BadRequest(new
+                {
+                    success = false,
+                    errors = new[] { "Регистрация не удалась" }
+                });
+            }
         }
 
-        /// <summary>Выполняет вход пользователя в систему.</summary>
-        /// <param name="model">Модель входа пользователя</param>
-        /// <returns>Результат операции входа</returns>
-        /// <response code="200">Успешный вход</response>
-        /// <response code="400">Ошибка при входе</response>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             if (!ModelState.IsValid)
                 return ValidationProblem(ModelState);
 
-            var firstResult = await _userService.GetUserByPhoneNumberAsync(model.PhoneNumber!);
+            try
+            {
+                var user = await _userService
+                    .GetUserByPhoneNumberAsync(model.phoneNumber!);
 
-            if (firstResult.Fail)
-                return BadRequest(new { success = false, errors = new[] { "Ivalid phone or password" } });
-
-            var user = firstResult.Value;
-
-            if (user == null)
-                return BadRequest(new { success = false, errors = new[] { "User not found after registration" } });
-
-            var secondResult = await _authService.LoginUserAsync(model);
-
-            if (secondResult.Fail)
-                return BadRequest(new { success = false, errors = secondResult.Errors });
-
-            return await GenerateAndSetTokens(user);
+                if (user == null)
+                    return BadRequest(new
+                    {
+                        success = false,
+                        errors = new[] { "Неверный телефон или пароль" }
+                    });
+                
+                await _authService.LoginUserAsync(model);
+                return await GenerateAndSetTokens(user);
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    errors = new[] { ex.Message }
+                });
+            }
+            catch (AuthenticationException ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    errors = new[] { ex.Message }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error during login");
+                return BadRequest(new
+                {
+                    success = false,
+                    errors = new[] { "Ошибка входа" }
+                });
+            }
         }
 
-        /// <summary>Проверяет статус аутентификации текущего пользователя.</summary>
-        /// <returns>Информация об аутентифицированном пользователе</returns>
-        /// <response code="200">Пользователь аутентифицирован</response>
-        /// <response code="401">Пользователь не аутентифицирован</response>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [Authorize]
         [HttpGet("check")]
         public IActionResult CheckAuth()
@@ -111,9 +172,10 @@ namespace Server.Presentation.Controllers
             });
         }
 
-        /// <summary>Выполняет выход пользователя из системы.</summary>
-        /// <returns>Результат операции выхода</returns>
-        /// <response code="200">Успешный выход</response>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [Authorize]
         [HttpPost("logout")]
         public IActionResult Logout()
@@ -123,9 +185,11 @@ namespace Server.Presentation.Controllers
             return Ok(new { success = true });
         }
 
-        /// <summary>Устанавливает токены в cookies ответа.</summary>
-        /// <param name="accessToken">Access token</param>
-        /// <param name="refreshToken">Refresh token</param>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <param name="refreshToken"></param>
         private void SetTokenCookies(string accessToken, string refreshToken)
         {
             var accessTokenCookieOptions = new CookieOptions
@@ -148,10 +212,12 @@ namespace Server.Presentation.Controllers
             Response.Cookies.Append("refreshToken", refreshToken, refreshCookieOptions);
         }
 
-        /// <summary>/// Генерирует и устанавливает токены для пользователя.</summary>
-        /// <param name="user">Пользователь</param>
-        /// <returns>Результат с установленными токенами</returns>
-        private async Task<IActionResult> GenerateAndSetTokens(User user)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        private async Task<IActionResult> GenerateAndSetTokens(UserEntity user)
         {
             var claims = new List<Claim>
             {

@@ -1,8 +1,8 @@
 namespace Server.Application.DTO
 {
     /// <summary>
-    /// DTO добавление друга.
+    /// 
     /// </summary>
-    /// <param name="userName">Никнейм друга.</param>
+    /// <param name="userName"></param>
     public record class AddFriendRequest(string userName);
 }

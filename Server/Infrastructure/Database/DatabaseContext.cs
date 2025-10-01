@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Server.Core.Entities;
 
-namespace Serverr.Infrastructure.Database
+namespace Server.Infrastructure.Database
 {
     /// <summary>Контекст базы данных для работы с пользователями.</summary>
     public class DatabaseContext : DbContext
