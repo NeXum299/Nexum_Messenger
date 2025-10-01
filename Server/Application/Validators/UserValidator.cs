@@ -5,12 +5,13 @@ using Server.Core.Entities;
 
 namespace Server.Application.Validators
 {
-    /// <summary>Валидатор для проверки объектов типа.<see cref="User"/>.</summary>
-    public class UserValidator : AbstractValidator<User>
+    /// <summary>
+    /// 
+    /// </summary>
+    public class UserValidator : AbstractValidator<UserEntity>
     {
         /// <summary>
-        /// Инициализирует новый экземпляр класса <see cref="UserValidator"/>
-        /// с настройками правил валидации.
+        /// 
         /// </summary>
         public UserValidator()
         {

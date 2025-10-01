@@ -79,7 +79,7 @@ namespace Server.Presentation.Controllers
                     errors = new[] { ex.Message }
                 });
             }
-            catch (UserCreationException ex)
+            catch (UserException ex)
             {
                 return BadRequest(new
                 {

@@ -5,7 +5,9 @@ using Server.Application.Interface.Services;
 
 namespace Server.Presentation.Controllers
 {
-    /// <summary>Контроллер для работы с пользователями.</summary>
+    /// <summary>
+    /// 
+    /// </summary>
     [Authorize]
     [ApiController]
     [Route("api/users")]
@@ -14,21 +16,22 @@ namespace Server.Presentation.Controllers
         private readonly IWebHostEnvironment _environment;
         private readonly IUserService _userService;
 
-        /// <summary>Инициализирует новый экземпляр UserController.</summary>
-        /// <param name="environment">Окружение веб-хоста</param>
-        /// <param name="userService">Сервис работы с пользователями</param>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="environment"></param>
+        /// <param name="userService"></param>
         public UserController(IWebHostEnvironment environment, IUserService userService)
         {
             _environment = environment;
             _userService = userService;
         }
 
-        /// <summary>Загружает аватар пользователя.</summary>
-        /// <param name="file">Файл аватара</param>
-        /// <returns>Результат загрузки аватара</returns>
-        /// <response code="200">Аватар успешно загружен</response>
-        /// <response code="400">Ошибка при загрузке аватара</response>
-        /// <response code="401">Пользователь не авторизован</response>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
         [HttpPost("update-avatar")]
         public async Task<IActionResult> UpdateAvatar(IFormFile file)
         {
@@ -73,12 +76,10 @@ namespace Server.Presentation.Controllers
             return Ok(new { success = true, avatarPath = $"{Request.Scheme}://{Request.Host}{updatedUser.AvatarPath}" });
         }
 
-        /// <summary>Получает имя и фамилию пользователя.</summary>
-        /// <returns>Имя и фамилия пользователя</returns>
-        /// <response code="200">Успешное получение данных</response>
-        /// <response code="400">Ошибка при получении данных</response>
-        /// <response code="401">Пользователь не авторизован</response>
-        /// <response code="404">Пользователь не найден</response>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("name")]
         public async Task<IActionResult> GetName()
         {
@@ -104,12 +105,10 @@ namespace Server.Presentation.Controllers
             });
         }
 
-        /// <summary>Получает URL аватара пользователя.</summary>
-        /// <returns>URL аватара пользователя</returns>
-        /// <response code="200">Успешное получение аватара</response>
-        /// <response code="400">Ошибка при получении аватара</response>
-        /// <response code="401">Пользователь не авторизован</response>
-        /// <response code="404">Пользователь не найден</response>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("avatar")]
         public async Task<IActionResult> GetAvatar()
         {

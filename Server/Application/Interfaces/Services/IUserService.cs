@@ -12,14 +12,6 @@ namespace Server.Application.Interface.Services
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="user"></param>
-        /// <param name="password"></param>
-        /// <returns></returns>
-        Task CreateUserAsync(UserEntity user, string password);
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <param name="userName"></param>
         /// <returns></returns>
         Task<UserEntity?> GetUserByUserNameAsync(string userName);

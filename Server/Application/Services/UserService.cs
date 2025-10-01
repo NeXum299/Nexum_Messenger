@@ -2,17 +2,18 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Server.Application.Interface.Repositories;
-using Server.Application.Results;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Hosting;
 using Server.Core.Entities;
 using Server.Application.Interface.Services;
-using System.Linq;
 using Server.Application.Validators;
+using Server.Application.Exceptions;
 
 namespace Server.Application.Services
 {
-    /// <summary>Сервис для работы с пользователями.</summary>
+    /// <summary>
+    /// 
+    /// </summary>
     public class UserService : IUserService
     {
         private readonly UserValidator _userValidator;
@@ -20,13 +21,18 @@ namespace Server.Application.Services
         private readonly IWebHostEnvironment _environment;
         private readonly ILogger<UserService> _logger;
 
-        /// <summary>Инициализирует новый экземпляр класса UserService.</summary>
-        /// <param name="userRepositories">Репозиторий пользователей.</param>
-        /// <param name="environment">Окружение веб-хоста.</param>
-        /// <param name="userValidator">Валидатор для класса <see cref="User"/>.</param>
-        /// <param name="logger">Логгер.</param>
-        public UserService(IUserRepository userRepositories, IWebHostEnvironment environment,
-            ILogger<UserService> logger, UserValidator userValidator)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userRepositories"></param>
+        /// <param name="environment"></param>
+        /// <param name="logger"></param>
+        /// <param name="userValidator"></param>
+        public UserService(
+            IUserRepository userRepositories,
+            IWebHostEnvironment environment,
+            ILogger<UserService> logger,
+            UserValidator userValidator)
         {
             _userRepositories = userRepositories;
             _environment = environment;
@@ -34,64 +40,43 @@ namespace Server.Application.Services
             _userValidator = userValidator;
         }
 
-        /// <summary>Создает нового пользователя в системе.</summary>
-        /// <param name="user">Объект пользователя с данными для создания.</param>
-        /// <param name="password">Пароль пользователя в открытом виде.</param>
-        /// <returns>Результат выполнения операции: успех или ошибка.</returns>
-        public async Task<Result> CreateUserAsync(User user, string password)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        public async Task UpdateUserAsync(UserEntity user)
         {
             var validationResult = await _userValidator.ValidateAsync(user);
             if (!validationResult.IsValid)
-            {
-                var errors = validationResult.Errors.Select(e => e.ErrorMessage);
-                return Result.Error(errors);
-            }
+                throw new ValidationException("Неверные данные при обновлении");
 
-            var result = await _userRepositories.CreateUserAsync(user, password);
-            return result.Fail ? Result.Error("User creation Error") : Result.Ok();
+            await _userRepositories.UpdateUserAsync(user);
         }
 
-        /// <summary>Обновляет данные пользователя.</summary>
-        /// <param name="user">Объект пользователя с обновленными данными.</param>
-        /// <returns>Результат выполнения операции: успех или ошибка.</returns>
-        public async Task<Result> UpdateUserAsync(User user)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="avatarPath"></param>
+        /// <returns></returns>
+        public async Task UpdateUserAvatarAsync(Guid userId, string avatarPath)
         {
-            var validationResult = await _userValidator.ValidateAsync(user);
+            var user = await _userRepositories
+                .GetUserByIdAsync(userId);
+
+            if (user == null)
+                throw new UserException("Пользователь не найден");
+
+            var validationResult = await _userValidator
+                .ValidateAsync(user);
+
             if (!validationResult.IsValid)
-            {
-                var errors = validationResult.Errors.Select(e => e.ErrorMessage);
-                return Result.Error(errors);
-            }
-
-            var result = await _userRepositories.UpdateUserAsync(user);
-            return result.Fail ? Result.Error("User update error") : Result.Ok();
-        }
-
-        /// <summary>Обновляет аватар пользователя.</summary>
-        /// <param name="userId">Идентификатор пользователя.</param>
-        /// <param name="avatarPath">Путь к новому файлу аватара.</param>
-        /// <returns>Результат выполнения операции: успех или ошибка.</returns>
-        /// <remarks>Удаляет старый аватар пользователя (если он не является дефолтным) перед сохранением нового.</remarks>
-        public async Task<Result> UpdateUserAvatarAsync(Guid userId, string avatarPath)
-        {
-            var userResult = await _userRepositories.GetUserByIdAsync(userId);
-
-            if (userResult.Fail || userResult.Value == null)
-                return Result.Error("User not found");
-
-            var user = userResult.Value;
-
-            var validationResult = await _userValidator.ValidateAsync(user);
-            if (!validationResult.IsValid)
-            {
-                var errors = validationResult.Errors.Select(e => e.ErrorMessage);
-                return Result.Error(errors);
-            }
+                throw new ValidationException(
+                    "Неверные данные при обновлении изображения");
 
             if (!string.IsNullOrEmpty(user.AvatarPath) &&
                 !user.AvatarPath.Equals("/avatars/users/default.jpg"))
-            {
-                try
                 {
                     var oldAvatarPath = Path.Combine(_environment.WebRootPath,
                         user.AvatarPath.TrimStart('/'));
@@ -99,103 +84,82 @@ namespace Server.Application.Services
                     if (File.Exists(oldAvatarPath))
                         File.Delete(oldAvatarPath);
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error deleting old avatar");
-                    return Result.Error("Error deleting old avatar");
-                }
-            }
 
             user.AvatarPath = avatarPath;
 
-            var updateResult = await _userRepositories.UpdateUserAsync(user);
-            return updateResult.Fail ? Result.Error("Error updating the user's avatar") 
-                : Result.Ok();
+            await _userRepositories.UpdateUserAsync(user);
         }
 
-        /// <summary>Удаляет пользователя по указанному идентификатору.</summary>
-        /// <param name="id">Уникальный идентификатор пользователя.</param>
-        /// <returns>Результат выполнения операции: успех или ошибка.</returns>
-        public async Task<Result> DeleteUserAsync(Guid id)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task DeleteUserAsync(Guid id)
         {
             var user = await _userRepositories.GetUserByIdAsync(id);
-            if (user.Fail || user.Value == null)
-                return Result.Error("User deletion error or him is null");
 
-            var validationResult = await _userValidator.ValidateAsync(user.Value);
+            if (user == null)
+                throw new UserException("Пользователь не найден");
+
+            var validationResult = await _userValidator.ValidateAsync(user);
             if (!validationResult.IsValid)
-            {
-                var errors = validationResult.Errors.Select(e => e.ErrorMessage);
-                return Result.Error(errors);
-            }
+                throw new ValidationException("Неверные данные при удалении");
 
-            var result = await _userRepositories.DeleteUserAsync(id);
-            return result.Fail ? Result.Error("User deletion error") : Result.Ok(); 
+            await _userRepositories.DeleteUserAsync(id);
         }
 
-        /// <summary>Получает пользователя по его никнейму.</summary>
-        /// <param name="userName">Никнейм пользователя.</param>
-        /// <returns>Возвращает найденого пользователь.</returns>
-        public async Task<Result<User?>> GetUserByUserNameAsync(string userName)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userName"></param>
+        /// <returns></returns>
+        public async Task<UserEntity?> GetUserByUserNameAsync(string userName)
         {
-            var userResult = await _userRepositories.GetUserByUserNameAsync(userName);
-            if (userResult.Fail || userResult.Value == null)
-                return Result.Error<User?>(null, "Error get the user or he is null");
-
-            return Result.Ok<User?>(userResult.Value);
+            return await _userRepositories.GetUserByUserNameAsync(userName);
         }
 
-        /// <summary>Находит пользователя по его уникальному идентификатору.</summary>
-        /// <param name="id">Уникальный идентификатор пользователя.</param>
-        /// <returns>Результат выполнения операции с найденным пользователем или ошибкой.</returns>
-        public async Task<Result<User?>> GetUserByIdAsync(Guid id)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<UserEntity?> GetUserByIdAsync(Guid id)
         {
-            var userResult = await _userRepositories.GetUserByIdAsync(id);
-            if (userResult.Fail || userResult.Value == null)
-                return Result.Error<User?>(null, "Error get user or he is null");
-
-            return Result.Ok<User?>(userResult.Value);
+            return await _userRepositories.GetUserByIdAsync(id);
         }
 
-        /// <summary>Находит пользователя по номеру телефона.</summary>
-        /// <param name="phoneNumber">Номер телефона пользователя.</param>
-        /// <returns>Результат выполнения операции с найденным пользователем или ошибкой.</returns>
-        public async Task<Result<User?>> GetUserByPhoneNumberAsync(string phoneNumber)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="phoneNumber"></param>
+        /// <returns></returns>
+        public async Task<UserEntity?> GetUserByPhoneNumberAsync(string phoneNumber)
         {
-            var userResult = await _userRepositories.GetUserByPhoneNumberAsync(phoneNumber);
-            if (userResult.Fail || userResult.Value == null)
-                return Result.Error<User?>(null, "Error get user or him is null");
-
-            return Result.Ok<User?  >(userResult.Value);
+            return await _userRepositories.GetUserByPhoneNumberAsync(phoneNumber);
         }
 
-        /// <summary>Обновляет refresh-токен пользователя.</summary>
-        /// <param name="userId">Идентификатор пользователя.</param>
-        /// <param name="refreshToken">Новый refresh-токен.</param>
-        /// <param name="expiryTime">Дата и время истечения срока действия токена.</param>
-        /// <returns>Результат выполнения операции: успех или ошибка.</returns>
-        public async Task<Result> UpdateUserRefreshTokenAsync(Guid userId, string refreshToken, DateTime expiryTime)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="refreshToken"></param>
+        /// <param name="expiryTime"></param>
+        /// <returns></returns>
+        public async Task UpdateUserRefreshTokenAsync(Guid userId, string refreshToken, DateTime expiryTime)
         {
-            var userResult = await _userRepositories.GetUserByIdAsync(userId);
-            if (userResult.Fail || userResult.Value == null)
-                return Result.Error("Refresh token update error");
+            var user = await _userRepositories.GetUserByIdAsync(userId);
 
-            var user = userResult.Value;
+            if (user == null) throw new UserException("Пользователь не найден");
 
             var validationResult = await _userValidator.ValidateAsync(user);
             if (validationResult.IsValid)
-            {
-                var errors = validationResult.Errors.Select(e => e.ErrorMessage);
-                return Result.Error(errors);
-            }
+                throw new ValidationException("Ошибка при обновлении токена");
 
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpiryTime = expiryTime;
 
-            var updateResult = await _userRepositories.UpdateUserAsync(user);
-
-            return updateResult.Fail ? Result.Error("Refresh token update error")
-                : Result.Ok();
+            await _userRepositories.UpdateUserAsync(user);
         }
     }
 }

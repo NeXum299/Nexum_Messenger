@@ -5,12 +5,12 @@ namespace Server.Application.Exceptions
     /// <summary>
     /// 
     /// </summary>
-    public class AuthenticationException : Exception
+    public class GroupException : Exception
     {
         /// <summary>
         /// 
         /// </summary>
         /// <param name="message"></param>
-        public AuthenticationException(string message) : base(message) { }
+        public GroupException(string message) : base(message) { }
     }
 }

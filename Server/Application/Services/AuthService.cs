@@ -60,11 +60,11 @@ namespace Server.Application.Services
 
             var newUser = new UserEntity
             {
-                FirstName = model.firtsName,
+                FirstName = model.firstName,
                 LastName = model.lastName,
                 UserName = model.userName,
                 PhoneNumber = model.phoneNumber,
-                BirthDate = model.BirthDate,
+                BirthDate = model.birthDate,
                 Role = "User",
                 RefreshToken = string.Empty,
                 RefreshTokenExpiryTime = DateTime.UtcNow
@@ -84,16 +84,16 @@ namespace Server.Application.Services
                 .ValidateAsync(model);
 
             if (!validationResult.IsValid)
-                throw new AuthenticationException("Неверные данные для входа");
+                throw new UserException("Неверные данные для входа");
 
             var user = await _userRepositories.GetUserByPhoneNumberAsync(model.phoneNumber);
 
             if (user == null)
-                throw new AuthenticationException(
+                throw new UserException(
                     "Неверный номер телефона или пароль");
 
             if (user.PasswordHash == null)
-                throw new AuthenticationException(
+                throw new UserException(
                     "Неверный номер телефона или пароль");
 
             var resultVerification = _passwordHasher.
@@ -101,7 +101,7 @@ namespace Server.Application.Services
                     model.password);
 
             if (resultVerification != PasswordVerificationResult.Success)
-                throw new AuthenticationException("Неверный номер телефона или пароль");
+                throw new UserException("Неверный номер телефона или пароль");
         }
     }
 }

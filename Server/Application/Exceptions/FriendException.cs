@@ -5,12 +5,12 @@ namespace Server.Application.Exceptions
     /// <summary>
     /// 
     /// </summary>
-    public class UserNotFoundException : Exception
+    public class FriendException : Exception
     {
         /// <summary>
         /// 
         /// </summary>
         /// <param name="message"></param>
-        public UserNotFoundException(string message) : base(message) { }
+        public FriendException(string message) : base(message) { }
     }
 }

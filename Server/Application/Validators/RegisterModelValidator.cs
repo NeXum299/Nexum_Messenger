@@ -4,45 +4,46 @@ using Server.Application.DTO;
 
 namespace Server.Application.Validators
 {
-    /// <summary>Валидатор для проверки объектов типа <see cref="RegisterModel"/>.</summary>
+    /// <summary>
+    /// 
+    /// </summary>
     public class RegisterModelValidator : AbstractValidator<RegisterModel>
     {
         /// <summary>
-        /// Инициализирует новый экземпляр класса <see cref="RegisterModelValidator"/>
-        /// с настройками правил валидации.
+        /// 
         /// </summary>
         public RegisterModelValidator()
         {
-            RuleFor(x => x.FirstName)
+            RuleFor(x => x.firstName)
                 .NotEmpty().WithMessage("Имя обязательно")
                 .Length(2, 20).WithMessage("Имя должно содержать от 2 до 20 символов")
                 .Matches(@"^[a-zA-Zа-яА-Я]+$").WithMessage("Имя может содержать только буквы");
 
-            RuleFor(x => x.LastName)
+            RuleFor(x => x.lastName)
                 .NotEmpty().WithMessage("Фамилия обязательна")
                 .Length(2, 25).WithMessage("Фамилия должна содержать от 2 до 25 символов")
                 .Matches(@"^[a-zA-Zа-яА-Я]+$").WithMessage("Фамилия может содержать только буквы");
 
-            RuleFor(x => x.UserName)
+            RuleFor(x => x.userName)
                 .NotEmpty().WithMessage("Никнейм обязателен для заполнения")
                 .Length(6, 70).WithMessage("Никнейм должна быть от 6 до 70 символов")
                 .Matches("^[a-zA-Z0-9]+$").WithMessage("Никнйем содержит недопустимые символы");
 
-            RuleFor(x => x.PhoneNumber)
+            RuleFor(x => x.phoneNumber)
                 .NotEmpty().WithMessage("Номер телефона обязателен")
                 .Matches(@"^\+?[0-9]{10,15}$").WithMessage("Номер телефона должен быть в международном формате");
 
-            RuleFor(x => x.AvatarPath)
+            RuleFor(x => x.avatarPath)
                 .NotEmpty().WithMessage("Путь к аватару обязателен")
                 .Must(uri => Uri.TryCreate(uri, UriKind.Absolute, out _))
-                .When(x => !string.IsNullOrEmpty(x.AvatarPath))
+                .When(x => !string.IsNullOrEmpty(x.avatarPath))
                 .WithMessage("Неверный формат пути к аватару");
 
-            RuleFor(x => x.BirthDate)
-                .Must(BeValidDate).When(x => x.BirthDate.HasValue)
+            RuleFor(x => x.birthDate)
+                .Must(BeValidDate).When(x => x.birthDate.HasValue)
                 .WithMessage("Некорректная дата рождения");
 
-            RuleFor(x => x.Password)
+            RuleFor(x => x.password)
                 .NotEmpty().WithMessage("Пароль обязателен")
                 .MinimumLength(8).WithMessage("Пароль должен содержать минимум 8 символов")
                 .MaximumLength(128).WithMessage("Пароль не должен превышать 128 символов")

@@ -3,67 +3,107 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Server.Application.DTO;
+using Server.Application.Exceptions;
 using Server.Application.Interface.Repositories;
 using Server.Application.Interface.Services;
-using Server.Application.Results;
 
 namespace Server.Application.Services
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class FriendService : IFriendService
     {
         private readonly IFriendRepository _friendRepository;
         private readonly IUserService _userService;
         private readonly ILogger<FriendService> _logger;
 
-        public FriendService(IFriendRepository friendRepository, IUserService userService, ILogger<FriendService> logger)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="friendRepository"></param>
+        /// <param name="userService"></param>
+        /// <param name="logger"></param>
+        public FriendService(
+            IFriendRepository friendRepository,
+            IUserService userService,
+            ILogger<FriendService> logger)
         {
             _friendRepository = friendRepository;
             _userService = userService;
             _logger = logger;
         }
 
-        public async Task<Result> AddFriendAsync(Guid userId, string friendUserName)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="friendUserName"></param>
+        /// <returns></returns>
+        public async Task AddFriendAsync(Guid userId, string friendUserName)
         {
             if (string.IsNullOrEmpty(friendUserName))
-                return Result.Error("Username is required");
+                throw new FriendException("Неверные данные");
 
-            var friendResult = await _userService.GetUserByUserNameAsync(friendUserName);
-            if (friendResult.Fail || friendResult.Value == null)
-                return Result.Error("User not found");
+            var friend = await _userService
+                .GetUserByUserNameAsync(friendUserName);
+            if (friend == null)
+                throw new FriendException("Пользователь не найден");
 
-            var friend = friendResult.Value;
-            
             if (userId == friend.Id)
-                return Result.Error("Cannot add yourself as friend");
+                throw new FriendException("Нельзя добавить себя в друзья");
 
-            return await _friendRepository.AddFriendAsync(userId, friend.Id);
+            await _friendRepository.AddFriendAsync(userId, friend.Id);
         }
 
-        public async Task<Result> AcceptFriendRequestAsync(Guid userId, Guid friendId)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="friendId"></param>
+        /// <returns></returns>
+        /// <exception cref="FriendException"></exception>
+        public async Task AcceptFriendRequestAsync(Guid userId, Guid friendId)
         {
-            var relationshipResult = await _friendRepository.GetFriendRelationshipAsync(friendId, userId);
-            if (relationshipResult.Fail || relationshipResult.Value == null)
-                return Result.Error("Friend request not found");
+            var relationship = await _friendRepository
+                .GetFriendRelationshipAsync(friendId, userId);
 
-            var relationship = relationshipResult.Value;
-            
+            if (relationship == null)
+                throw new FriendException("Запрос не найден");
+
             if (relationship.Status != "Pending")
-                return Result.Error("Request is not pending");
+                throw new FriendException("Запрос не находится на рассмотрении");
 
-            return await _friendRepository.AcceptFriendRequestAsync(userId, friendId);
+            await _friendRepository.AcceptFriendRequestAsync(userId, friendId);
         }
 
-        public async Task<Result> RemoveFriendAsync(Guid userId, Guid friendId)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="friendId"></param>
+        /// <returns></returns>
+        public async Task RemoveFriendAsync(Guid userId, Guid friendId)
         {
-            return await _friendRepository.RemoveFriendAsync(userId, friendId);
+            await _friendRepository.RemoveFriendAsync(userId, friendId);
         }
 
-        public async Task<Result<List<FriendDto>>> GetFriendsAsync(Guid userId)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<List<FriendDto>> GetFriendsAsync(Guid userId)
         {
             return await _friendRepository.GetFriendsAsync(userId);
         }
 
-        public async Task<Result<List<FriendRequestDto>>> GetIncomingRequestsAsync(Guid userId)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<List<FriendRequestDto>> GetIncomingRequestsAsync(Guid userId)
         {
             return await _friendRepository.GetIncomingRequestsAsync(userId);
         }

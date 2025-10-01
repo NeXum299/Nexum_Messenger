@@ -4,12 +4,13 @@ using Server.Core.Entities;
 
 namespace Server.Application.Validators
 {
-    /// <summary>Валидатор для проверки объектов типа <see cref="MessageGroup"/>.</summary>
-    public class GroupMessageValidator : AbstractValidator<MessageGroup>
+    /// <summary>
+    /// 
+    /// </summary>
+    public class GroupMessageValidator : AbstractValidator<MessageGroupEntity>
     {
         /// <summary>
-        /// Инициализирует новый экземпляр класса <see cref="GroupMessageValidator"/>
-        /// с настройками правил валидации.
+        /// 
         /// </summary>
         public GroupMessageValidator()
         {

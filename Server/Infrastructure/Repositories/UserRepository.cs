@@ -53,12 +53,12 @@ namespace Server.Infrastructure.Repositories
             catch (DbUpdateException ex)
             {
                 _logger.LogError($"Database update error: {ex.Message}");
-                throw new UserCreationException("Ошибка обновления базы данных");
+                throw new UserException("Ошибка обновления базы данных");
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Unexpected error: {ex.Message}");
-                throw new UserCreationException(
+                throw new UserException(
                     "Неожиданная ошибка при создании пользователя");
             }
         }
@@ -156,7 +156,7 @@ namespace Server.Infrastructure.Repositories
                     .FirstOrDefaultAsync(u => u.Id == id);
 
                 if (user == null)
-                    throw new UserNotFoundException("User not found");
+                    throw new UserException("User not found");
 
                 _dbContext.Remove(user);
                 await _dbContext.SaveChangesAsync();

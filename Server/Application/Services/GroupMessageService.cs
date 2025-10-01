@@ -3,15 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Cassandra;
+using Server.Application.Exceptions;
 using Server.Application.Interface.Repositories;
 using Server.Application.Interface.Services;
-using Server.Application.Results;
 using Server.Application.Validators;
 using Server.Core.Entities;
 
 namespace Server.Application.Services
 {
-    /// <summary>Сервис для работы с сообщениями.</summary>
+    /// <summary>
+    /// 
+    /// </summary>
     public class GroupMessageService : IGroupMessageService
     {
         private readonly IGroupMemberRepository _groupMemberRepository;
@@ -19,13 +21,17 @@ namespace Server.Application.Services
         private readonly IGroupRepository _groupRepository;
         private readonly GroupMessageValidator _groupMessageValidator;
 
-        /// <summary>Конструктор, который инициализирует локальные поля класса.</summary>
-        /// <param name="groupMessageRepository">Репозиторий сообщений.</param>
-        /// <param name="groupRepository">Репозиторий группы.</param>
-        /// <param name="groupMemberRepository">Репозиторий участника.</param>
-        /// <param name="groupMessageValidator">Валидатор сообщений.</param>
-        public GroupMessageService(IGroupMessageRepository groupMessageRepository,
-            IGroupRepository groupRepository, IGroupMemberRepository groupMemberRepository,
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="groupMessageRepository"></param>
+        /// <param name="groupRepository"></param>
+        /// <param name="groupMemberRepository"></param>
+        /// <param name="groupMessageValidator"></param>
+        public GroupMessageService(
+            IGroupMessageRepository groupMessageRepository,
+            IGroupRepository groupRepository,
+            IGroupMemberRepository groupMemberRepository,
             GroupMessageValidator groupMessageValidator)
         {
             _groupMemberRepository = groupMemberRepository;
@@ -34,23 +40,25 @@ namespace Server.Application.Services
             _groupMessageValidator = groupMessageValidator;
         }
 
-        /// <summary>Отправляет сообщение в указанную группу.</summary>
-        /// <param name="groupId">Идентификатор группы.</param>
-        /// <param name="senderId">Иденитфикатор отправителя.</param>
-        /// <param name="content">Контент сообщения.</param>
-        /// <param name="attachmentUrl">Ссылка на какое то вложение.</param>
-        /// <returns>Сообщение.</returns>
-        public async Task<Result<MessageGroup>> SendMessageAsync(Guid groupId, Guid senderId, string content, string? attachmentUrl = null)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <param name="senderId"></param>
+        /// <param name="content"></param>
+        /// <param name="attachmentUrl"></param>
+        /// <returns></returns>
+        public async Task<MessageGroupEntity> SendMessageAsync(Guid groupId, Guid senderId, string content, string? attachmentUrl = null)
         {
-            var groupResult = await _groupRepository.GetGroupByIdAsync(groupId);
-            if (groupResult.Fail || groupResult.Value == null)
-                return Result.Error<MessageGroup>(null!, "Group not found.");
+            var group = await _groupRepository.GetGroupByIdAsync(groupId);
+            if (group == null)
+                throw new GroupMessageException("Группа не найдена");
 
             var isMember = await IsMemberAsync(groupId, senderId);
             if (!isMember)
-                return Result.Error<MessageGroup>(null!, "You are not a member of this group");
+                throw new GroupMemberException("Вы не являетесь членом этой группы");
 
-            var message = new MessageGroup
+            var message = new MessageGroupEntity
             {
                 GroupId = groupId,
                 SenderId = senderId,
@@ -67,12 +75,14 @@ namespace Server.Application.Services
                 : Result.Ok(resultSend.Value); 
         }
 
-        /// <summary>Получает историю сообщений.</summary>
-        /// <param name="groupId">Идентификатор группы.</param>
-        /// <param name="limit">Лимит прогрузки сообщений за раз.</param>
-        /// <param name="userId">Идентификатор пользователя.</param>
-        /// <returns>Список сообщений.</returns>
-        public async Task<Result<List<MessageGroup>>> GetMessagesAsync(Guid groupId, Guid userId, int limit = 50)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <param name="userId"></param>
+        /// <param name="limit"></param>
+        /// <returns></returns>
+        public async Task<List<MessageGroupEntity>> GetMessagesAsync(Guid groupId, Guid userId, int limit = 50)
         {
             var groupResult = await _groupRepository.GetGroupByIdAsync(groupId);
             if (groupResult.Fail || groupResult.Value == null)
@@ -85,13 +95,15 @@ namespace Server.Application.Services
             return await _groupMessageRepository.GetMessagesAsync(groupId, limit);
         }
 
-        /// <summary>Редактирует сообщение.</summary>
-        /// <param name="groupId">Идентификатор группы.</param>
-        /// <param name="messageId">Иденитфикатор сообщения.</param>
-        /// <param name="userId">Идентификатор пользователя.</param>
-        /// <param name="newContent">Новый контент сообщения.</param>
-        /// <returns>Отредактированное сообщение.</returns>
-        public async Task<Result<MessageGroup>> UpdateMessagesAsync(Guid groupId, Guid userId, TimeUuid messageId, string newContent)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <param name="userId"></param>
+        /// <param name="messageId"></param>
+        /// <param name="newContent"></param>
+        /// <returns></returns>
+        public async Task<MessageGroupEntity> UpdateMessagesAsync(Guid groupId, Guid userId, TimeUuid messageId, string newContent)
         {
             var messageResult = await _groupMessageRepository.GetMessagesAsync(groupId, 1);
             if (messageResult.Fail || messageResult.Value.First(m => m.MessageId == messageId) == null)
@@ -103,12 +115,14 @@ namespace Server.Application.Services
             return await _groupMessageRepository.UpdateMessageAsync(groupId, messageId, newContent);
         }
 
-        /// <summary>Удаляет сообщение.</summary>
-        /// <param name="groupId">Идентификатор группы.</param>
-        /// <param name="userId">Идентификатор пользователя.</param>
-        /// <param name="messageId">Иденитфикатор сообщения.</param>
-        /// <returns>Результат операции.</returns>
-        public async Task<Result> DeleteMessageAsync(Guid groupId, Guid userId, TimeUuid messageId)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <param name="userId"></param>
+        /// <param name="messageId"></param>
+        /// <returns></returns>
+        public async Task DeleteMessageAsync(Guid groupId, Guid userId, TimeUuid messageId)
         {
             var messageResult = await _groupMessageRepository.GetMessagesAsync(groupId, 1);
             if (messageResult.Fail || messageResult.Value.First(m => m.MessageId == messageId) == null)

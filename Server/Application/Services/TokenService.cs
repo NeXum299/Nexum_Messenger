@@ -11,21 +11,27 @@ using Server.Application.Jwt;
 
 namespace Server.Application.Services
 {
-    /// <summary>Реализация сервиса для работы с JWT токенами.</summary>
+    /// <summary>
+    /// 
+    /// </summary>
     public class TokenService : ITokenService
     {
         private readonly JwtSettings _jwtSettings;
 
-        /// <summary>Инициализирует новый экземпляр TokenService.</summary>
-        /// <param name="jwtSettings">Настройки JWT токенов.</param>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="jwtSettings"></param>
         public TokenService(IOptions<JwtSettings> jwtSettings)
         {
             _jwtSettings = jwtSettings.Value;
         }
 
-        /// <summary>Генерирует JWT access токен на основе claims.</summary>
-        /// <param name="claims">Набор claims для включения в токен.</param>
-        /// <returns>Сгенерированный JWT access токен.</returns>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="claims"></param>
+        /// <returns></returns>
         public string GenerateAccessToken(IEnumerable<Claim> claims)
         {
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
@@ -42,8 +48,10 @@ namespace Server.Application.Services
             return new JwtSecurityTokenHandler().WriteToken(tokenOptions);
         }
 
-        /// <summary>Генерирует криптографически безопасный refresh токен.</summary>
-        /// <returns>Сгенерированный refresh токен в формате Base64.</returns>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public string GenerateRefreshToken()
         {
             var randomNumber = new byte[32];
@@ -54,10 +62,12 @@ namespace Server.Application.Services
             }
         }
 
-        /// <summary>Валидирует истекший access токен и извлекает из него principal.</summary>
-        /// <param name="token">Access токен для валидации.</param>
-        /// <returns>ClaimsPrincipal пользователя.</returns>
-        /// <exception cref="SecurityTokenException">Выбрасывается при невалидном токене или несоответствии алгоритма подписи.</exception>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        /// <exception cref="SecurityTokenException"></exception>
         public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
         {
             var tokenValidationParameters = new TokenValidationParameters
