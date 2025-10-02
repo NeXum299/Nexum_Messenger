@@ -9,7 +9,7 @@ using Server.Application.Exceptions;
 using Server.Application.Interface.Repositories;
 using Server.Core.Entities;
 
-namespace ICassandraSessionProvider.Infrastructure.Repositories
+namespace Server.Infrastructure.Repositories
 {
     /// <summary>
     /// 

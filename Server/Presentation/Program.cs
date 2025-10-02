@@ -14,7 +14,6 @@ using Server.Infrastructure.Repositories;
 using System.Reflection;
 using System.Text;
 using Microsoft.OpenApi.Models;
-using Server.Core.Interfaces;
 using Server.Infrastructure.Cassandra;
 using Server.Application.Validators;
 using Server.Application.Interface.Services;
@@ -75,13 +74,13 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddSingleton(resolver => resolver.GetRequiredService<IOptions<JwtSettings>>().Value);
-builder.Services.AddSingleton<ICassandraSessionProvider, CassandraSessionProvider>();
+builder.Services.AddSingleton<Server.Core.Interfaces.ICassandraSessionProvider, CassandraSessionProvider>();
 
 
 builder.Services.AddDbContext<DatabaseContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddScoped<IPasswordHasher<UserEntity>, PasswordHasher<UserEntity>>();
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();

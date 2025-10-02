@@ -63,15 +63,11 @@ namespace Server.Presentation.Controllers
 
             var avatarPath = $"/avatars/users/{fileName}";
 
-            var firstResult = await _userService.UpdateUserAvatarAsync(userId, avatarPath);
-            if (firstResult.Fail)
-                return BadRequest(new { success = false, error = firstResult.Errors.FirstOrDefault() ?? "Failed to update avatar" });
+            await _userService.UpdateUserAvatarAsync(userId, avatarPath);
 
-            var secondResult = await _userService.GetUserByIdAsync(userId);
-            if (secondResult.Fail || secondResult.Value == null)
-                return BadRequest(new { success = false, error = secondResult.Errors.FirstOrDefault() ?? "Failed to get user data by id" });
-
-            var updatedUser = secondResult.Value;
+            var updatedUser = await _userService.GetUserByIdAsync(userId);
+            if (updatedUser == null)
+                return BadRequest(new { success = false, error =  "Не удалось получить данные пользователя по идентификатору" });
 
             return Ok(new { success = true, avatarPath = $"{Request.Scheme}://{Request.Host}{updatedUser.AvatarPath}" });
         }
@@ -88,14 +84,10 @@ namespace Server.Presentation.Controllers
             if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
                 return Unauthorized();
 
-            var result = await _userService.GetUserByIdAsync(userId);
+            var user = await _userService.GetUserByIdAsync(userId);
 
-            if (result.Fail)
-                return BadRequest(new { success = false, error = result.Errors.FirstOrDefault() ?? "Failed to get user data by id" });
-            if (result.Value == null)
-                return NotFound(new { success = false, error = result.Errors.FirstOrDefault() ?? "User not found" });
-
-            var user = result.Value;
+            if (user == null)
+                return NotFound(new { success = false, error = "Пользователь не найден" });
 
             return Ok(new
             {
@@ -121,23 +113,10 @@ namespace Server.Presentation.Controllers
             if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
                 return Unauthorized();
 
-            var result = await _userService.GetUserByIdAsync(userId);
+            var user = await _userService.GetUserByIdAsync(userId);
 
-            if (result.Fail)
-                return BadRequest(new { success = false, error = result.Errors.First() ?? "Failed to get user data by id" });
-            if (result.Value == null)
-                return NotFound(new { success = false, error = result.Errors.First() ?? "User not found" });
-
-            var user = result.Value;
-
-            if (user == null || string.IsNullOrEmpty(user.AvatarPath))
-            {
-                return Ok(new
-                {
-                    success = true,
-                    avatarPath = $"{Request.Scheme}://{Request.Host}/avatars/default.jpg"
-                });
-            }
+            if (user == null)
+                return NotFound(new { success = false, error = "Пользователь не найден" });
 
             return Ok(new
             {

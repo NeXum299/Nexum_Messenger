@@ -1,21 +1,20 @@
 using System;
-using System.Buffers;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Server.Application.DTO;
+using Server.Application.Exceptions;
 using Server.Application.Interface.Repositories;
 using Server.Application.Interface.Services;
-using Server.Application.Results;
 using Server.Application.Validators;
 using Server.Core.Entities;
 
 namespace Server.Application.Services
 {
-    /// <summary>Сервис для работы с группой.</summary>
+    /// <summary>
+    /// 
+    /// </summary>
     public class GroupService : IGroupService
     {
         private readonly IGroupRepository _groupRepository;
@@ -25,22 +24,25 @@ namespace Server.Application.Services
         private readonly UserValidator _userValidator;
         private readonly GroupMemberValidator _groupMemberValidator;
         private readonly ILogger<GroupService> _logger;
-        private readonly IMapper _mapper;
 
-        /// <summary>Конструктор инициализирующий <see cref="IGroupRepository"/>, <see cref="GroupValidator"/>,
-        /// <see cref="UserValidator"/>> и <see cref="GroupMemberValidator"/>.</summary>
-        /// <param name="groupRepository">Репозиторий для работы с группой.</param>
-        /// <param name="userRepository">Репозиторий для работы с пользователем.</param>
-        /// <param name="groupMemberRepository">Репозиторий для работы с участниками группы.</param>
-        /// <param name="groupValidator">Валидатор для группы.</param>
-        /// <param name="userValidator">Валидатор для пользователя.</param>
-        /// <param name="groupMemberValidator">Валидатор для участник группы.</param>
-        /// <param name="mapper">Маппер для группы и  DTO группы.</param>
-        /// <param name="logger">Логирование для сервиса.</param>
-        public GroupService(IGroupRepository groupRepository, GroupValidator groupValidator,
-            UserValidator userValidator, GroupMemberValidator groupMemberValidator,
-            ILogger<GroupService> logger, IUserRepository userRepository,
-            IGroupMemberRepository groupMemberRepository, IMapper mapper)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="groupRepository"></param>
+        /// <param name="groupValidator"></param>
+        /// <param name="userValidator"></param>
+        /// <param name="groupMemberValidator"></param>
+        /// <param name="logger"></param>
+        /// <param name="userRepository"></param>
+        /// <param name="groupMemberRepository"></param>
+        public GroupService(
+            IGroupRepository groupRepository,
+            GroupValidator groupValidator,
+            UserValidator userValidator,
+            GroupMemberValidator groupMemberValidator,
+            ILogger<GroupService> logger,
+            IUserRepository userRepository,
+            IGroupMemberRepository groupMemberRepository)
         {
             _groupRepository = groupRepository;
             _groupValidator = groupValidator;
@@ -49,121 +51,157 @@ namespace Server.Application.Services
             _logger = logger;
             _userRepository = userRepository;
             _groupMemberRepository = groupMemberRepository;
-            _mapper = mapper;
         }
 
-        /// <summary>Создаёт новую группу с указанным названием и описанием.</summary>
-        /// <param name="groupDto">DTO создаваемой группы.</param>
-        /// <param name="creatorId">Идентификатолр создателя группы.</param>
-        /// <returns>При успехе, возвращает успешный результат с созданной группой.</returns>
-        /// <returns>При ошибке, возвращает проваленный результат и null с описанием ошибки.</returns>
-        public async Task<Result<GroupDto>> CreateGroupAsync(GroupDto groupDto, Guid creatorId)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="groupDto"></param>
+        /// <param name="creatorId"></param>
+        /// <returns></returns>
+        /// <exception cref="GroupException"></exception>
+        public async Task<GroupDto> CreateGroupAsync(GroupDto groupDto, Guid creatorId)
         {
             try
             {
-                var creatorResult = await _userRepository.GetUserByIdAsync(creatorId);
-                if (creatorResult.Fail || creatorResult.Value == null)
-                    return Result.Error<GroupDto>(null!, "Error creating group. May be him is null?");
+                var creator = await _userRepository.GetUserByIdAsync(creatorId);
+                if (creator == null)
+                    throw new GroupException("Ошибка создания группы");
 
-                var validationUserResult = await _userValidator.ValidateAsync(creatorResult.Value);
+                var validationUserResult = await _userValidator.ValidateAsync(creator);
                 if (!validationUserResult.IsValid)
-                {
-                    var errors = validationUserResult.Errors.Select(e => e.ErrorMessage);
-                    return Result.Error<GroupDto>(null!, errors);
-                }
+                    throw new ValidationException("Неверные данные пользователя при создании группы");
 
-                var newGroup = _mapper.Map<Group>(groupDto);
-                newGroup.CreatedBy = creatorResult.Value;
-                newGroup.CreatedById = creatorResult.Value.Id;
+                var newGroup = new GroupEntity
+                {
+                    Id = groupDto.id,
+                    Name = groupDto.name,
+                    Description = groupDto.description,
+                    AvatarPath = groupDto.avatarPath,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = creator,
+                    CreatedById = creator.Id
+                };
 
                 var validationResult = await _groupValidator.ValidateAsync(newGroup);
                 if (!validationResult.IsValid)
-                {
-                    var errors = validationResult.Errors.Select(e => e.ErrorMessage);
-                    return Result.Error<GroupDto>(null!, errors);
-                }
+                    throw new ValidationException("Неверные данные группы при создании группы");
 
-                var resultCreateGroup = await _groupRepository.CreateGroupAsync(newGroup, creatorResult.Value);
+                var createdGroup = await _groupRepository.CreateGroupAsync(newGroup, creator);
 
-                var createdGroupDto = _mapper.Map<GroupDto>(resultCreateGroup.Value);
+                var createdGroupDto = new GroupDto
+                (
+                    createdGroup.Id,
+                    createdGroup.Name!,
+                    createdGroup.Description,
+                    createdGroup.AvatarPath
+                );
 
-                return resultCreateGroup.Fail ? Result.Error<GroupDto>(null!, "Group creation Error")
-                    : Result.Ok(createdGroupDto);
+                return createdGroupDto;
             }
             catch (DbUpdateException ex)
             {
                 _logger.LogError(ex, "Error update database after create group.");
-                return Result.Error<GroupDto>(null!, "Error update database after create group.");
+                throw new GroupException("Ошибка обновления базы данных после создания группы");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error update database after create group.");
-                return Result.Error<GroupDto>(null!, "Unexpected error.");
+                throw new GroupException("Ошибка обновления базы данных после создания группы");
             }
         }
 
-        /// <summary>Получает найденую группу.</summary>
-        /// <param name="groupId">Идентификатор группы.</param>
-        /// <returns>Возвращает найденую группу.</returns>
-        public async Task<Result<GroupDto>> GetGroupByIdAsync(Guid groupId)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <returns></returns>
+        /// <exception cref="GroupException"></exception>
+        public async Task<GroupDto> GetGroupByIdAsync(Guid groupId)
         {
-            var resultGroup = await _groupRepository.GetGroupByIdAsync(groupId);
-            if (resultGroup.Fail)
-                return Result.Error<GroupDto>(null!, "Group not found");
+            var group = await _groupRepository.GetGroupByIdAsync(groupId);
+            if (group == null)
+                throw new GroupException("Группа не найдена");
 
-            var findGroupDto = _mapper.Map<GroupDto>(resultGroup.Value);
+            var foundGroupDto = new GroupDto
+            (
+                group.Id,
+                group.Name!,
+                group.Description,
+                group.AvatarPath
+            );
 
-            return Result.Ok(findGroupDto);
+            return foundGroupDto;
         }
 
-        /// <summary>Получает список всех групп, в которых есть участник.</summary>
-        /// <param name="userId">Идентификатор пользователя.</param>
-        /// <returns>Возвращает все найденные группы.</returns>
-        public async Task<Result<List<GroupDto>>> GetAllGroupByGroupMemberId(Guid userId)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        /// <exception cref="GroupException"></exception>
+        public async Task<List<GroupDto>> GetAllGroupByGroupMemberId(Guid userId)
         {
-            var userResult = await _userRepository.GetUserByIdAsync(userId);
-            if (userResult.Fail || userResult.Value == null)
-                return Result.Error(new List<GroupDto>(), "Error get the user");
+            var user = await _userRepository.GetUserByIdAsync(userId);
+            if (user == null)
+                throw new GroupException("Пользователь не найден при запросе к списку групп");
 
-            var groupsResult = await _groupRepository.GetAllGroupByUserId(userId);
-            if (groupsResult.Fail)
-                return Result.Error(new List<GroupDto>(), "Error get list groups by user id");
+            var groups = await _groupRepository.GetAllGroupByUserId(userId);
 
-            var groupsDto = _mapper.Map<List<GroupDto>>(groupsResult.Value);
+            List<GroupDto> groupsDto = new List<GroupDto>();
 
-            return Result.Ok(groupsDto);
+            foreach (var group in groups)
+            {
+                groupsDto.Add(new GroupDto
+                (
+                    group.Id,
+                    group.Name!,
+                    group.Description,
+                    group.AvatarPath
+                ));
+            }
+
+            return groupsDto;
         }
 
-        /// <summary>Обновляет группу.</summary>
-        /// <param name="groupDto">DTO группы.</param>
-        /// <returns>Обновлённый DTO группы.</returns>
-        public async Task<Result<GroupDto>> UpdateGroupAsync(GroupDto groupDto)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="groupDto"></param>
+        /// <returns></returns>
+        /// <exception cref="GroupException"></exception>
+        public async Task<GroupDto> UpdateGroupAsync(GroupDto groupDto)
         {
-            var updateResult = await _groupRepository.UpdateGroupAsync(groupDto);
-        
-            if (updateResult.Fail || updateResult.Value == null)
-                return Result.Error<GroupDto>(null!,
-                    updateResult.Errors.FirstOrDefault() ?? "Error updating group");
+            var updatedGroup = await _groupRepository.UpdateGroupAsync(groupDto);
 
-            var updatedGroupDto = _mapper.Map<GroupDto>(updateResult.Value);
+            if (updatedGroup == null)
+                throw new GroupException("Неверные данные перед обновлением");
 
-            return Result.Ok(updatedGroupDto);
+            var updatedGroupDto = new GroupDto
+            (
+                updatedGroup.Id,
+                updatedGroup.Name!,
+                updatedGroup.Description,
+                updatedGroup.AvatarPath
+            );
+
+            return updatedGroupDto;
         }
 
-        /// <summary>Удаляет группу.</summary>
-        /// <param name="groupId">Идентификатор группы.</param>
-        /// <returns>Результат операции.</returns>
-        public async Task<Result> RemoveGroupAsync(Guid groupId)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <returns></returns>
+        /// <exception cref="GroupException"></exception>
+        public async Task RemoveGroupAsync(Guid groupId)
         {
-            var groupResult = await _groupRepository.GetGroupByIdAsync(groupId);
-            if (groupResult.Fail || groupResult.Value == null)
-                return Result.Error<GroupDto>(null!, "Error get the group"); 
+            var group = await _groupRepository.GetGroupByIdAsync(groupId);
 
-            var removeResult = await _groupRepository.DeleteGroupAsync(groupId);
-            if (removeResult.Fail)
-                return Result.Error<GroupDto>(null!, "Error remove the group");
+            if (group == null)
+                throw new GroupException("Ошибка получения группы"); 
 
-            return Result.Ok();
+            await _groupRepository.DeleteGroupAsync(groupId);
         }
     }
 }

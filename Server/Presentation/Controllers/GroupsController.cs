@@ -6,7 +6,9 @@ using Server.Application.Interface.Services;
 
 namespace Server.Presentation.Controllers
 {
-    /// <summary>Контроллер для работы с группами.</summary>
+    /// <summary>
+    /// 
+    /// </summary>
     [ApiController]
     [Route("api/groups")]
     [Authorize]
@@ -14,89 +16,91 @@ namespace Server.Presentation.Controllers
     {
         private readonly IGroupService _groupService;
 
-        /// <summary>Конструктор, который инициализирует локальные поля класса.</summary>
-        /// <param name="groupService">Сервис группы.</param>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="groupService"></param>
         public GroupsController(IGroupService groupService)
         {
             _groupService = groupService;
         }
 
-        /// <summary>Создаёт группу.</summary>
-        /// <param name="groupDto">DTO группы.</param>
-        /// <response code="200">Успешное создание группы.</response>
-        /// <response code="400">Ошибка при создании группы.</response>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="groupDto"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> CreateGroup([FromBody] GroupDto groupDto)
         {
             var userId = GetCurrentUserId();
 
-            var resultCreate = await _groupService.CreateGroupAsync(groupDto, userId);
+            var createdGroup = await _groupService.CreateGroupAsync(groupDto, userId);
 
-            if (resultCreate.Fail || resultCreate.Value == null)
-                return BadRequest(new { success = false, errors = resultCreate.Errors});
+            if (createdGroup == null)
+                return BadRequest(new { success = false });
 
             return CreatedAtAction(
                 nameof(GetGroup),
-                new { groupId = resultCreate.Value.Id },
-                new { success = true, value = resultCreate.Value }
+                new { groupId = createdGroup.id },
+                new { success = true, value = createdGroup }
             );
         }
 
-        /// <summary>Получает информацию о группе.</summary>
-        /// <param name="groupId">Идентификатор группы.</param>
-        /// <response code="200">Возвращает информацию о группе.</response>
-        /// <response code="404">Группа не найдена.</response>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <returns></returns>
         [HttpGet("{groupId}")]
         public async Task<IActionResult> GetGroup(Guid groupId)
         {
             if (groupId == Guid.Empty)
-                return BadRequest(new { success = false, errors = "Invalid group ID"});
+                return BadRequest(new { success = false, errors = "Неверный идентификатор группы" });
 
-            var result = await _groupService.GetGroupByIdAsync(groupId);
+            var groupDto = await _groupService.GetGroupByIdAsync(groupId);
 
-            return (result.Fail || result.Value == null)
-                ? NotFound(new { success = false, errors = result.Errors})
-                : Ok(new { success = true, value = result.Value});
+            return (groupDto == null)
+                ? NotFound(new { success = false})
+                : Ok(new { success = true, value = groupDto});
         }
 
-        /// <summary>Возвращает список групп, в которых состоит текущий пользователь.</summary>
-        /// <returns>Список групп.</returns>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetAllGroup()
         {
             var userId = GetCurrentUserId();
-            var result = await _groupService.GetAllGroupByGroupMemberId(userId);
-            return (result.Fail || result.Value == null) ? BadRequest(result.Errors)
-                : Ok(new { success = true, value = result.Value});
+            var groupsDto = await _groupService.GetAllGroupByGroupMemberId(userId);
+            return Ok(new { success = true, value = groupsDto });
         }
 
-        /// <summary>Обновляет группу по идентификатору.</summary>
-        /// <param name="groupDto">Идентификатор группы.</param>
-        /// <returns>Обновленная группа.</returns>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="groupDto"></param>
+        /// <returns></returns>
         [HttpPut]
         public async Task<IActionResult> UpdateGroup([FromBody] GroupDto groupDto)
         {
-            var result = await _groupService.UpdateGroupAsync(groupDto);
-
-            if (result.Fail || result.Value == null)
-                return BadRequest();
-            
-            return Ok(result.Value);
+            var updatedGroupDto = await _groupService.UpdateGroupAsync(groupDto);
+            if (updatedGroupDto == null) return BadRequest();
+            return Ok(updatedGroupDto);
         }
 
-        /// <summary>Удаление группы по идентификатору.</summary>
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="groupId"></param>
-        /// <returns>Результат операции.</returns>
+        /// <returns></returns>
         [HttpDelete("{groupId}")]
         public async Task<IActionResult> DeleteGroup([FromRoute] Guid groupId)
         {
-            var result = await _groupService.RemoveGroupAsync(groupId);
-
-            if (result.Fail)
-                return BadRequest(new { success = false,
-                    errors = result.Errors?.FirstOrDefault() ?? "Ошибка при удалении группы"});
+            await _groupService.RemoveGroupAsync(groupId);
             
-            return Ok(new { message = "Вы успешно покинули группу", success = true});
+            return Ok(new { success = true, message = "Вы успешно покинули группу" });
         }
 
         private Guid GetCurrentUserId()

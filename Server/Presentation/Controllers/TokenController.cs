@@ -6,7 +6,9 @@ using Server.Application.Jwt;
 
 namespace Server.Presentation.Controllers
 {
-    /// <summary>Контроллер для работы с токенами.</summary>
+    /// <summary>
+    /// 
+    /// </summary>
     [Route("api/token")]
     [ApiController]
     public class TokenController : ControllerBase
@@ -15,10 +17,12 @@ namespace Server.Presentation.Controllers
         private readonly IUserService _userService;
         private readonly JwtSettings _jwtSettings;
 
-        /// <summary>Инициализирует новый экземпляр TokenController.</summary>
-        /// <param name="tokenService">Сервис работы с токенами</param>
-        /// <param name="userService">Сервис работы с пользователями</param>
-        /// <param name="jwtSettings">Настройки JWT</param>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tokenService"></param>
+        /// <param name="userService"></param>
+        /// <param name="jwtSettings"></param>
         public TokenController(ITokenService tokenService, IUserService userService, JwtSettings jwtSettings)
         {
             _tokenService = tokenService;
@@ -26,10 +30,10 @@ namespace Server.Presentation.Controllers
             _jwtSettings = jwtSettings;
         }
 
-        /// <summary>Обновляет access и refresh токены.</summary>
-        /// <returns>Результат обновления токенов</returns>
-        /// <response code="200">Токены успешно обновлены</response>
-        /// <response code="400">Ошибка при обновлении токенов</response>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         [HttpPost]
         [Route("refresh")]
         public async Task<IActionResult> Refresh()
@@ -53,9 +57,7 @@ namespace Server.Presentation.Controllers
                 if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
                     return BadRequest("Invalid token");
 
-                var result = await _userService.GetUserByIdAsync(userId);
-
-                var user = result.Value;
+                var user = await _userService.GetUserByIdAsync(userId);;
 
                 if (user == null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
                     return BadRequest("Invalid client request");
@@ -75,9 +77,11 @@ namespace Server.Presentation.Controllers
             }
         }
 
-        /// <summary>Устанавливает токены в cookies ответа.</summary>
-        /// <param name="accessToken">Access token</param>
-        /// <param name="refreshToken">Refresh token</param>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="accessToken"></param>
+        /// <param name="refreshToken"></param>
         private void SetTokenCookies(string accessToken, string refreshToken)
         {
             var accessTokenCookieOptions = new CookieOptions
