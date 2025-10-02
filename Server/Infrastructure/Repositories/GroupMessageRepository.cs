@@ -5,41 +5,51 @@ using System.Threading.Tasks;
 using Cassandra;
 using Cassandra.Mapping;
 using Microsoft.Extensions.Logging;
+using Server.Application.Exceptions;
 using Server.Application.Interface.Repositories;
-using Server.Application.Results;
 using Server.Core.Entities;
-using Server.Core.Interfaces;
 
 namespace ICassandraSessionProvider.Infrastructure.Repositories
 {
-    /// <summary>Репозиторий для работы с сообщениями.</summary>
+    /// <summary>
+    /// 
+    /// </summary>
     public class GroupMessageRepository : IGroupMessageRepository
     {
         private readonly Mapper _mapper;
         private readonly ISession _session;
         private readonly ILogger<GroupMessageRepository> _logger;
 
-        /// <summary>Конструктор для инициализации Mapper, ISession и Logger</summary>
-        /// <param name="sessionProvider">Сессия ноды.</param>
-        /// <param name="logger">Логирование ошибок.</param>
-        public GroupMessageRepository(ICassandraSessionProvider sessionProvider, ILogger<GroupMessageRepository> logger)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sessionProvider"></param>
+        /// <param name="logger"></param>
+        public GroupMessageRepository(
+            Server.Core.Interfaces.ICassandraSessionProvider sessionProvider,
+            ILogger<GroupMessageRepository> logger)
         {
             _session = sessionProvider.GetSession();
             _mapper = new Mapper(sessionProvider.GetSession());
             _logger = logger;
         }
 
-        /// <summary>Асинхронно создаёт новое сообщение в группе.</summary>
-        /// <param name="groupId">Идентификатор группы.</param>
-        /// <param name="senderId">Идентификатор отправителя.</param>
-        /// <param name="content">Содержимое сообщения.</param>
-        /// <returns>При успехе, вернёт успешный результат с сообщением.</returns>
-        /// <returns>При ошибке, вернёт проваленный результат с null и описанием ошибки.</returns>
-        public async Task<Result<MessageGroup>> AddMessageAsync(Guid groupId, Guid senderId, string content)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <param name="senderId"></param>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        /// <exception cref="GroupMessageException"></exception>
+        public async Task<MessageGroupEntity> AddMessageAsync(
+            Guid groupId,
+            Guid senderId,
+            string content)
         {
             try
             {
-                var message = new MessageGroup
+                var message = new MessageGroupEntity
                 {
                     GroupId = groupId,
                     SenderId = senderId,
@@ -49,56 +59,52 @@ namespace ICassandraSessionProvider.Infrastructure.Repositories
 
                 await _mapper.InsertAsync(message, insertNulls: false);
 
-                return Result.Ok(message);
+                return message;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Failed to add message to group {groupId}");
-                return Result.Error<MessageGroup>(null!, "Failed to add message.");
+                throw new GroupMessageException("Не удалось добавить сообщение");
             }
         }
 
-        /// <summary>Асинхронно получает сообщение.</summary>
-        /// <param name="groupId">Идентификатор группы.</param>
-        /// <param name="limit">Лимит получения сообщений за раз.</param>
-        /// <returns>При успехе, вернёт успешный результат со списком сообщений.</returns>
-        /// <returns>При ошибке, вернёт проваленный результат с пустым списком и описанием ошибки.</returns>
-        public async Task<Result<List<MessageGroup>>> GetMessagesAsync(Guid groupId, int limit = 50)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <param name="limit"></param>
+        /// <returns></returns>
+        /// <exception cref="GroupMemberException"></exception>
+        public async Task<List<MessageGroupEntity>> GetMessagesAsync(Guid groupId, int limit = 50)
         {
             if (limit <= 0 || limit > 50)
-                return Result.Error
-                (
-                    new List<MessageGroup>(),
-                    "Limit must be between 1 and 50"
-                );
-
+                throw new GroupMemberException("Лимит должен составлять от 1 до 50");
             try
             {
-                var messages = (await _mapper.FetchAsync<MessageGroup>
+                var messages = (await _mapper.FetchAsync<MessageGroupEntity>
                     ("WHERE group_id = ? ORDER BY message_time_id DESC LIMIT ?", groupId, limit)).ToList();
-                return Result.Ok(messages);
+                return messages;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error fetching messages for group {GroupId}", groupId);
-                return Result.Error(
-                    value: new List<MessageGroup>(),
-                    error: "Failed to get messages."
-                );
+                throw new GroupMessageException("Не удалось получить сообщения");
             }
         }
 
-        /// <summary>Асинхронное обновление сообщения.</summary>
-        /// <param name="groupId">Идентификатор группы.</param>
-        /// <param name="messageId">Идентификатор сообщения.</param>
-        /// <param name="newContent">Новое сообщение.</param>
-        /// /// <returns>При успехе, вернёт успешный результат с новым сообщением.</returns>
-        /// <returns>При ошибке, вернёт проваленный результат с null и описанием ошибки.</returns>
-        public async Task<Result<MessageGroup>> UpdateMessageAsync(Guid groupId, TimeUuid messageId, string newContent)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <param name="messageId"></param>
+        /// <param name="newContent"></param>
+        /// <returns></returns>
+        /// <exception cref="GroupMessageException"></exception>
+        public async Task<MessageGroupEntity> UpdateMessageAsync(Guid groupId, TimeUuid messageId, string newContent)
         {
             try
             {
-                var existingMessage = await _mapper.FirstOrDefaultAsync<MessageGroup>
+                var existingMessage = await _mapper.FirstOrDefaultAsync<MessageGroupEntity>
                 (
                     "WHERE group_id = ? AND message_time_id = ?", groupId, messageId
                 );
@@ -106,10 +112,10 @@ namespace ICassandraSessionProvider.Infrastructure.Repositories
                 if (existingMessage == null)
                 {
                     _logger.LogWarning($"Message {messageId} not found in group {groupId}", messageId, groupId);
-                    return Result.Error<MessageGroup>(null!, "Message not found");
+                    throw new GroupMessageException("Сообщение не найдено");
                 }
 
-                await _mapper.UpdateAsync<MessageGroup>
+                await _mapper.UpdateAsync<MessageGroupEntity>
                 (
                     "SET content = ?, is_edited = true WHERE group_id = ? AND message_time_id = ?",
                     newContent, groupId, messageId
@@ -118,7 +124,7 @@ namespace ICassandraSessionProvider.Infrastructure.Repositories
                 existingMessage.Content = newContent;
                 existingMessage.IsEdited = true;
 
-                return Result.Ok(existingMessage);
+                return existingMessage;
             }
             catch (Exception ex)
             {
@@ -127,26 +133,28 @@ namespace ICassandraSessionProvider.Infrastructure.Repositories
                     ex, $"Failed to update message {messageId} in group {groupId}",
                     messageId, groupId
                 );
-                return Result.Error<MessageGroup>(null!, "Failed to update message.");
+                throw new GroupMessageException("Failed to update message.");
             }
         }
 
-        /// <summary>УдаляеАсинхронно удаляет сообщение.</summary>
-        /// <param name="groupId">Идентификатор группы.</param>
-        /// <param name="messageId">Идентификатор сообщения.</param>
-        /// <returns>При успехе, возвращает успешный результат.</returns>
-        /// <returns>При ошибке, возвращает проваленный результат с описанием ошибки.</returns>
-        public async Task<Result> DeleteMessageAsync(Guid groupId, TimeUuid messageId)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="groupId"></param>
+        /// <param name="messageId"></param>
+        /// <returns></returns>
+        /// <exception cref="GroupMessageException"></exception>
+        public async Task DeleteMessageAsync(Guid groupId, TimeUuid messageId)
         {
             try
             {
-                await _mapper.DeleteAsync<MessageGroup>
+                await _mapper.DeleteAsync<MessageGroupEntity>
                 (
                     "WHERE group_id = ? AND message_time_id = ?",
                     groupId, messageId
                 );
 
-                var exists = await _mapper.FirstOrDefaultAsync<MessageGroup>
+                var exists = await _mapper.FirstOrDefaultAsync<MessageGroupEntity>
                 (
                     "WHERE group_id = ? AND message_time_id = ?",
                     groupId, messageId
@@ -156,10 +164,8 @@ namespace ICassandraSessionProvider.Infrastructure.Repositories
                 {
                     _logger.LogWarning("Delete failed - message {MessageId} not found in group {GroupId}", 
                     messageId, groupId);
-                    return Result.Error("Message not found or already deleted.");
+                    throw new GroupMessageException("Сообщение не найдено или уже удалено");
                 }
-
-                return Result.Ok();
             }
             catch (Exception ex)
             {
@@ -167,7 +173,7 @@ namespace ICassandraSessionProvider.Infrastructure.Repositories
                 (
                     ex, $"Failed to delete message {messageId} from group {groupId}", messageId, groupId
                 );
-                return Result.Error($"Failed to delete message.");
+                throw new GroupMessageException("Не удалось удалить сообщение");
             }
         }
     }

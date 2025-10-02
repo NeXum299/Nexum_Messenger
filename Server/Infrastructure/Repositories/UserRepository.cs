@@ -39,6 +39,7 @@ namespace Server.Infrastructure.Repositories
         /// <param name="user"></param>
         /// <param name="password"></param>
         /// <returns></returns>
+        /// <exception cref="UserException"></exception>
         public async Task CreateUserAsync(UserEntity user, string password)
         {
             try
@@ -68,6 +69,7 @@ namespace Server.Infrastructure.Repositories
         /// </summary>
         /// <param name="userName"></param>
         /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task<UserEntity?> GetUserByUserNameAsync(string userName)
         {
             try
@@ -88,6 +90,7 @@ namespace Server.Infrastructure.Repositories
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task<UserEntity?> GetUserByIdAsync(Guid id)
         {
             try
@@ -107,6 +110,7 @@ namespace Server.Infrastructure.Repositories
         /// </summary>
         /// <param name="phoneNumber"></param>
         /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task<UserEntity?> GetUserByPhoneNumberAsync(string? phoneNumber)
         {
             try
@@ -123,10 +127,11 @@ namespace Server.Infrastructure.Repositories
         }
 
         /// <summary>
-        ///
+        /// 
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task UpdateUserAsync(UserEntity user)
         {
             try
@@ -148,6 +153,7 @@ namespace Server.Infrastructure.Repositories
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task DeleteUserAsync(Guid id)
         {
             try

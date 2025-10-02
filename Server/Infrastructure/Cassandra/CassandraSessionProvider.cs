@@ -5,10 +5,9 @@ using Server.Core.Interfaces;
 namespace Server.Infrastructure.Cassandra
 {
     /// <summary>
-    /// Реализация провайдера сессии Cassandra.
-    /// Создает и управляет подключением к кластеру Cassandra.
+    /// 
     /// </summary>
-    public class CassandraSessionProvider : ICassandraSessionProvider
+    public class CassandraSessionProvider : Core.Interfaces.ICassandraSessionProvider
     {
         private readonly Cluster _cluster;
         private readonly ISession _session;

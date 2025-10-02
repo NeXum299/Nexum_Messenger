@@ -7,36 +7,51 @@ using Server.Core.Entities;
 namespace Server.Application.Interface.Repositories
 {
     /// <summary>
-    /// Определяет контракт для репозитория управления дружескими отношениями.
+    /// 
     /// </summary>
     public interface IFriendRepository
     {
         /// <summary>
-        /// Получает информацию о дружеских отношениях между двумя пользователями.
+        /// 
         /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="friendId"></param>
+        /// <returns></returns>
         Task<FriendEntity?> GetFriendRelationshipAsync(Guid userId, Guid friendId);
 
         /// <summary>
-        /// Создает запрос на добавление в друзья.
+        /// 
         /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="friendId"></param>
+        /// <returns></returns>
         Task AddFriendAsync(Guid userId, Guid friendId);
 
         /// <summary>
-        /// Подтверждает входящий запрос на дружбу.
+        /// 
         /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="friendId"></param>
+        /// <returns></returns>
         Task AcceptFriendRequestAsync(Guid userId, Guid friendId);
 
         /// <summary>
-        /// Удаляет дружеские отношения.
+        /// 
         /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="friendId"></param>
+        /// <returns></returns>
         Task RemoveFriendAsync(Guid userId, Guid friendId);
 
         /// <summary>
-        /// Получает список всех подтвержденных друзей пользователя.
+        /// 
         /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         Task<List<FriendDto>> GetFriendsAsync(Guid userId);
 
         /// <summary>
+        /// 
         /// </summary>
         /// <param name="userId"></param>
         /// <returns></returns>

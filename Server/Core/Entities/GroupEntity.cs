@@ -17,7 +17,7 @@ namespace Server.Core.Entities
         public string? Description { get; set; }
 
         /// <summary>Путь аватарки группы.</summary>
-        public string AvatarPath { get; set; } = "/avatars/groups/default.jpg";
+        public string? AvatarPath { get; set; }
 
         /// <summary>Время создания группы.</summary>
         public DateTime CreatedAt { get; set; }

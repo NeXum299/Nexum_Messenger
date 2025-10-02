@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Server.Infrastructure.Hubs 
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class PersonalHub : Hub
     {
         /*private readonly IPersonalMessageRepository _personalMessageRepository;

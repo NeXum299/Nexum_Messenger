@@ -7,16 +7,16 @@ namespace Server.Infrastructure.Database
     public class DatabaseContext : DbContext
     {
         /// <summary>Набор данных пользователей.</summary>
-        public DbSet<User> Users { get; set; }
+        public DbSet<UserEntity> Users { get; set; }
 
         /// <summary>Набор данных групп.</summary>
-        public DbSet<Group> Groups { get; set; }
+        public DbSet<GroupEntity> Groups { get; set; }
 
         /// <summary>Набор данных членов группы.</summary>
-        public DbSet<GroupMember> GroupMembers { get; set; }
+        public DbSet<GroupMemberEntity> GroupMembers { get; set; }
 
         /// <summary>Набор данных друзей.</summary>
-        public DbSet<Friend> Friends { get; set; }
+        public DbSet<FriendEntity> Friends { get; set; }
 
         /// <summary>Инициализирует новый экземпляр <see cref="DatabaseContext"/>.</summary>
         /// <param name="options">Параметры конфигурации контекста.</param>
@@ -31,7 +31,7 @@ namespace Server.Infrastructure.Database
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<User>(entity =>
+            builder.Entity<UserEntity>(entity =>
             {
                 entity.HasKey(u => u.Id);
 
@@ -58,7 +58,7 @@ namespace Server.Infrastructure.Database
                 entity.Property(u => u.CreatedAt).IsRequired(); 
             });
 
-            builder.Entity<Group>(entity => {
+            builder.Entity<GroupEntity>(entity => {
                 entity.HasKey(g => g.Id);
 
                 entity.Property(g => g.Name)
@@ -82,7 +82,7 @@ namespace Server.Infrastructure.Database
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            builder.Entity<GroupMember>(entity =>
+            builder.Entity<GroupMemberEntity>(entity =>
             {
                 entity.HasKey(gm => gm.Id);
         
@@ -100,7 +100,7 @@ namespace Server.Infrastructure.Database
                 entity.Property(gm => gm.JoinedAt).IsRequired();
             });
 
-            builder.Entity<Friend>(entity =>
+            builder.Entity<FriendEntity>(entity =>
             {
                 entity.HasKey(f => f.Id);
                 
