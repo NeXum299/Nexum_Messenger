@@ -1,6 +1,13 @@
-var builder = WebApplication.CreateBuilder(args);
-var app = builder.Build();
+using Microsoft.EntityFrameworkCore;
+using UserService.Infrastructure.Context;
 
-app.MapGet("/", () => "Hello World!");
+var builder = WebApplication.CreateBuilder(args);
+
+// База данных
+string dbConnection = builder.Configuration.GetConnectionString(nameof(UserDbContext));
+builder.Services.AddDbContext<UserDbContext>(options =>
+    options.UseNpgsql(dbConnection));
+
+var app = builder.Build();
 
 app.Run();
