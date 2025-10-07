@@ -1,14 +1,15 @@
 namespace UserSerivce.Core.Entities;
 
-public record UserEntity(
-    Guid Id,
-    string UserName,
-    string FirstName,
-    string? LastName,
-    string? MiddleName,
-    string PhoneNumber,
-    string AvatarPath,
-    DateOnly? BirthDate,
-    DateTime CreatedAt,
-    string PasswordHash
-);
+public class UserEntity
+{
+    public Guid Id { get; set; }
+    public string UserName { get; set; } = string.Empty;
+    public string FirstName { get; set; } = string.Empty;
+    public string? LastName { get; set; }
+    public string? MiddleName { get; set; }
+    public string PhoneNumber { get; set; } = string.Empty;
+    public string AvatarPath { get; set; } = string.Empty;
+    public DateOnly? BirthDate { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public string PasswordHash { get; set; } = string.Empty;
+}
