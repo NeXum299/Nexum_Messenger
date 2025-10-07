@@ -29,6 +29,12 @@ public class UserService : IUserService
         return UserMaps.MapToReceivedResponse(user);
     }
 
+    public async Task<UserReceivedResponse?> GetAsync(string userName)
+    {
+        var user = await _userRepository.GetAsync(userName);
+        return UserMaps.MapToReceivedResponse(user);
+    }
+
     public async Task<UserUpdatedResponse?> UpdateAsync(UserUpdatedRequest request)
     {
         var user = UserMaps.MapToUser(request);

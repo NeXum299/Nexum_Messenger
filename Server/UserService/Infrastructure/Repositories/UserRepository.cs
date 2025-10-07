@@ -32,6 +32,11 @@ public class UserRepository : IUserRepository
     {
         return await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
     }
+    
+    public async Task<UserEntity?> GetAsync(string userName)
+    {
+        return await _dbContext.Users.FirstOrDefaultAsync(u => u.UserName == userName);
+    }
 
     public async Task<UserEntity?> UpdateAsync(UserEntity user)
     {

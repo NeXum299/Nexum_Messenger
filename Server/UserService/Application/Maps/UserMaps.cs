@@ -2,7 +2,6 @@ using UserSerivce.Application.DTO.Created;
 using UserSerivce.Application.DTO.Updated;
 using UserSerivce.Application.DTO.Received;
 using UserSerivce.Core.Entities;
-using System.Data.Common;
 
 namespace UserSerivce.Application.Maps;
 
@@ -63,6 +62,7 @@ public static class UserMaps
     {
         return new UserCreatedResponse
         (
+            Id: user.Id,
             UserName: user.UserName,
             FirstName: user.FirstName,
             LastName: user.LastName,
@@ -78,6 +78,7 @@ public static class UserMaps
     {
         return new UserUpdatedResponse
         (
+            Id: user.Id,
             UserName: user.UserName,
             FirstName: user.FirstName,
             LastName: user.LastName,
@@ -93,6 +94,7 @@ public static class UserMaps
     {
         return new UserReceivedResponse
         (
+            Id: user.Id,
             UserName: user.UserName,
             FirstName: user.FirstName,
             LastName: user.LastName,

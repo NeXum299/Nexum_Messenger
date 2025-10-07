@@ -8,6 +8,7 @@ public record UserCreatedRequest(
     string? MiddleName,
     string PhoneNumber,
     string AvatarPath,
+    string Password,
     DateOnly? BirthDate,
     DateTime CreatedAt
 );

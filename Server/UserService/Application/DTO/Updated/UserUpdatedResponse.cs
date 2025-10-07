@@ -1,6 +1,7 @@
 namespace UserSerivce.Application.DTO.Updated;
 
 public record UserUpdatedResponse(
+    Guid Id,
     string UserName,
     string FirstName,
     string? LastName,

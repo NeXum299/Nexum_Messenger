@@ -8,6 +8,7 @@ public interface IUserService
 {
     Task<UserCreatedResponse?> CreateAsync(UserCreatedRequest user, string password);
     Task<UserReceivedResponse?> GetAsync(Guid userId);
+    Task<UserReceivedResponse?> GetAsync(string userName);
     Task<UserUpdatedResponse?> UpdateAsync(UserUpdatedRequest user);
     Task DeleteAsync(Guid userId);
 }

@@ -1,6 +1,7 @@
 namespace UserSerivce.Application.DTO.Created;
 
 public record UserCreatedResponse(
+    Guid Id,
     string UserName,
     string FirstName,
     string? LastName,
