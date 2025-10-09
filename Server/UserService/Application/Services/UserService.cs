@@ -1,11 +1,11 @@
-using UserSerivce.Core.Interfaces.Services;
-using UserSerivce.Application.DTO.Created;
-using UserSerivce.Application.DTO.Received;
-using UserSerivce.Application.DTO.Updated;
-using UserSerivce.Application.Interfaces.Repositories;
-using UserSerivce.Application.Maps;
+using UserService.Core.Interfaces.Services;
+using UserService.Application.DTO.Created;
+using UserService.Application.DTO.Received;
+using UserService.Application.DTO.Updated;
+using UserService.Application.Interfaces.Repositories;
+using UserService.Application.Maps;
 
-namespace UserSerivce.Application.Services;
+namespace UserService.Application.Services;
 
 public class UserService : IUserService
 {

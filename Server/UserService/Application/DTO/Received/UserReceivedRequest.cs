@@ -1,4 +1,4 @@
-namespace UserSerivce.Application.DTO.Received;
+namespace UserService.Application.DTO.Received;
 
 public record UserReceivedRequest(
     Guid Id,

@@ -1,4 +1,4 @@
-namespace UserSerivce.Application.DTO.Updated;
+namespace UserService.Application.DTO.Updated;
 
 public record UserUpdatedResponse(
     Guid Id,

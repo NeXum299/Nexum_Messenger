@@ -1,4 +1,4 @@
-namespace UserSerivce.Application.DTO.Created;
+namespace UserService.Application.DTO.Created;
 
 public record UserCreatedRequest(
     Guid Id,

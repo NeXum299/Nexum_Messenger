@@ -1,6 +1,6 @@
-using UserSerivce.Core.Entities;
+using UserService.Core.Entities;
 
-namespace UserSerivce.Application.Interfaces.Repositories;
+namespace UserService.Application.Interfaces.Repositories;
 
 public interface IUserRepository
 {

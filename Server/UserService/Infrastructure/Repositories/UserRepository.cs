@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using UserSerivce.Core.Entities;
-using UserSerivce.Application.Interfaces.Repositories;
+using UserService.Core.Entities;
+using UserService.Application.Interfaces.Repositories;
 using UserService.Infrastructure.Context;
 using Microsoft.AspNetCore.Identity;
 
-namespace UserSerivce.Infrastructure.Repositories;
+namespace UserService.Infrastructure.Repositories;
 
 public class UserRepository : IUserRepository
 {

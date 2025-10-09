@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using UserSerivce.Core.Entities;
+using UserService.Core.Entities;
 
 namespace UserService.Infrastructure.Context;
 

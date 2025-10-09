@@ -1,9 +1,9 @@
-using UserSerivce.Application.DTO.Created;
-using UserSerivce.Application.DTO.Updated;
-using UserSerivce.Application.DTO.Received;
-using UserSerivce.Core.Entities;
+using UserService.Application.DTO.Created;
+using UserService.Application.DTO.Updated;
+using UserService.Application.DTO.Received;
+using UserService.Core.Entities;
 
-namespace UserSerivce.Application.Maps;
+namespace UserService.Application.Maps;
 
 public static class UserMaps
 {

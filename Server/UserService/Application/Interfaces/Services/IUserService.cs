@@ -1,8 +1,8 @@
-using UserSerivce.Application.DTO.Created;
-using UserSerivce.Application.DTO.Received;
-using UserSerivce.Application.DTO.Updated;
+using UserService.Application.DTO.Created;
+using UserService.Application.DTO.Received;
+using UserService.Application.DTO.Updated;
 
-namespace UserSerivce.Core.Interfaces.Services;
+namespace UserService.Core.Interfaces.Services;
 
 public interface IUserService
 {
